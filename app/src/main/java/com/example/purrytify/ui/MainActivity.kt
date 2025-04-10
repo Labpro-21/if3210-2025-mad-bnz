@@ -5,6 +5,7 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.purrytify.R
 import com.example.purrytify.databinding.ActivityMainBinding
@@ -34,9 +35,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupNavigation() {
-        val navController = findNavController(R.id.nav_host_fragment)
-        binding.bottomNavigation.setupWithNavController(navController)
-    }
+    // Find NavController more safely
+    val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+    val navController = navHostFragment.navController
+    binding.bottomNavigation.setupWithNavController(navController)
+}
 
     private fun observeNetworkStatus() {
         NetworkUtils.observeNetworkStatus(this) { isConnected ->
