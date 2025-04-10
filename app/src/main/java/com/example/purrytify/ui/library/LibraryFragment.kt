@@ -34,10 +34,15 @@ class LibraryFragment : Fragment() {
     }
 
     private fun setupAdapter() {
-        songAdapter = SongAdapter { song ->
+    songAdapter = SongAdapter(
+        onItemClick = { song ->
             viewModel.playSong(song)
+        },
+        onLikeClick = { song ->
+            viewModel.toggleLike(song)
         }
-    }
+    )
+}
 
     private fun setupRecyclerView() {
         binding.rvSongs.apply {

@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface SongDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSong(song: Song)
+    fun insertSong(song: Song)
 
     @Update
-    suspend fun updateSong(song: Song)
+    fun updateSong(song: Song)
 
     @Query("SELECT * FROM songs ORDER BY createdAt DESC")
     fun getAllSongs(): Flow<List<Song>>
@@ -29,8 +29,8 @@ interface SongDao {
     fun getNewSongs(): Flow<List<Song>>
 
     @Query("UPDATE songs SET lastPlayed = :timestamp WHERE id = :songId")
-    fun updateLastPlayed(songId: String, timestamp: Long): Int
+    fun updateLastPlayed(songId: String, timestamp: Long)
 
     @Query("DELETE FROM songs WHERE id = :songId")
-    fun deleteSong(songId: String): Int
+    fun deleteSong(songId: String)
 }

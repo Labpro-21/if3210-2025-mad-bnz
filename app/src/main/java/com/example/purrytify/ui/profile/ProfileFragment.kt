@@ -7,10 +7,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.purrytify.databinding.FragmentProfileBinding
 import com.example.purrytify.model.ApiResponse
 import com.example.purrytify.model.User
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ProfileFragment : Fragment() {
@@ -34,15 +38,18 @@ class ProfileFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.profile.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                is ApiResponse.Loading -> showLoading()
-                is ApiResponse.Success -> showProfile(state.data)
-                is ApiResponse.Error -> showError(state.message)
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.profile.collect { state ->
+                    when (state) {
+                        is ApiResponse.Loading -> showLoading()
+                        is ApiResponse.Success -> showProfile(state.data)
+                        is ApiResponse.Error -> showError(state.message)
+                    }
+                }
             }
         }
     }
-
     private fun showProfile(user: User) {
         binding.tvUsername.text = user.username
         binding.tvEmail.text = user.email

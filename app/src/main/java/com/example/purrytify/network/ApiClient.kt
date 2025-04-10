@@ -1,5 +1,5 @@
 package com.example.purrytify.network
-import com.example.purrytify.BuildConfig
+//import com.example.purrytify.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -8,9 +8,10 @@ import java.util.concurrent.TimeUnit
 
 object ApiClient {
     private const val BASE_URL = "http://34.101.226.132:3000/"
+    private const val DEBUG = true
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = if (BuildConfig.DEBUG) {
+        level = if (DEBUG) {
             HttpLoggingInterceptor.Level.BODY
         } else {
             HttpLoggingInterceptor.Level.NONE

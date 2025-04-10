@@ -42,6 +42,11 @@
     <action
         android:id="@+id/navigation_to_login"
         app:destination="@id/login_activity" />
+    <!-- Add to your main_nav.xml -->
+
+    <action
+        android:id="@+id/action_settingsFragment_to_loginActivity"
+        app:destination="@id/login_activity" />
 
     <!-- Activity destinations (correctly defined) -->
     <activity
@@ -51,4 +56,5 @@
     <activity
         android:id="@+id/login_activity"
         android:name="com.example.purrytify.auth.LoginActivity" />
+
 </navigation>

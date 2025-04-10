@@ -37,13 +37,23 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupAdapters() {
-        recentSongsAdapter = SongAdapter { song ->
-            viewModel.playSong(song)
-        }
+        recentSongsAdapter = SongAdapter(
+            onItemClick = { song ->
+                viewModel.playSong(song)
+            },
+            onLikeClick = { song ->
+                viewModel.toggleLike(song)
+            }
+        )
 
-        newSongsAdapter = SongAdapter { song ->
-            viewModel.playSong(song)
-        }
+        newSongsAdapter = SongAdapter(
+            onItemClick = { song ->
+                viewModel.playSong(song)
+            },
+            onLikeClick = { song ->
+                viewModel.toggleLike(song)
+            }
+        )
     }
 
     private fun setupRecyclerViews() {

@@ -99,14 +99,14 @@
         app:layout_constraintStart_toStartOf="@id/btn_login"
         app:layout_constraintTop_toTopOf="@id/btn_login"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Don't have an account? Sign up"
-        android:textColor="@color/gray"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_login"/>
+<!--    <TextView-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="16dp"-->
+<!--&lt;!&ndash;        android:text="Don't have an account? Sign up"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textColor="@color/gray"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintEnd_toEndOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintStart_toStartOf="parent"&ndash;&gt;-->
+<!--        app:layout_constraintTop_toBottomOf="@id/btn_login"/>-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

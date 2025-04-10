@@ -24,6 +24,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+
     }
 
     compileOptions {
@@ -43,6 +44,7 @@ android {
 dependencies {
     implementation ("androidx.navigation:navigation-fragment-ktx:2.5.3")
     implementation ("androidx.navigation:navigation-ui-ktx:2.5.3")
+    implementation ("com.jakewharton.timber:timber:5.0.1")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -50,6 +52,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.4")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.4")
     implementation("androidx.media:media:1.6.0")
@@ -76,7 +79,8 @@ dependencies {
     implementation("androidx.media3:media3-ui:1.1.1")
 
     // Preferences
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
+    implementation ("androidx.datastore:datastore-core:1.0.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

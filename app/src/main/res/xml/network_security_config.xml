@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<network-security-config>
+    <!-- Base configuration with certificate pinning -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
 
-</PreferenceScreen>
+    <!-- Debug configuration for development -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="user"/>
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

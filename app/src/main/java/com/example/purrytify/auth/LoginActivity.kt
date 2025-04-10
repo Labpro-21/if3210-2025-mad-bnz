@@ -1,4 +1,5 @@
 package com.example.purrytify.auth
+import android.util.Log
 
 import android.content.Intent
 import android.os.Bundle
@@ -45,30 +46,29 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        viewModel.loginState.observe(this) { state ->
-            when (state) {
-                is ApiResponse.Loading -> {
-                    binding.btnLogin.isEnabled = false
-                    binding.progressBar.visibility = View.VISIBLE
-                }
-
-                is ApiResponse.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    navigateToMain()
-                }
-
-                is ApiResponse.Error -> {
-                    binding.btnLogin.isEnabled = true
-                    binding.progressBar.visibility = View.GONE
-                    showToast(state.message)
-                }
+    viewModel.loginState.observe(this) { state ->
+        Log.d("LoginActivity", "Login state changed: $state")
+        
+        when (state) {
+            is ApiResponse.Loading -> {
+                binding.btnLogin.isEnabled = false
+                binding.progressBar.visibility = View.VISIBLE
+            }
+            is ApiResponse.Success -> {
+                binding.progressBar.visibility = View.GONE
+                navigateToMain()
+            }
+            is ApiResponse.Error -> {
+                binding.btnLogin.isEnabled = true
+                binding.progressBar.visibility = View.GONE
+                showToast(state.message)
             }
         }
     }
-
+}
     private fun navigateToMain() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
-        finish()
+        finish()  // This prevents going back to the login screen
     }
 }

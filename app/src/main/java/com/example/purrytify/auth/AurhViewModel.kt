@@ -29,12 +29,19 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val response = apiService.login(LoginRequest(email, password))
-
                 if (response.isSuccessful) {
-                    val loginResponse = response.body()!!
-                    tokenManager.saveAccessToken(loginResponse.token)
-                    tokenManager.saveRefreshToken(loginResponse.refreshToken)
-                    _loginState.value = ApiResponse.Success(Unit)
+                    val loginResponse = response.body()
+
+                    // Add null check here:
+                    if (loginResponse?.accessToken != null) {
+                        tokenManager.saveAccessToken(loginResponse.accessToken)
+                        if (loginResponse.refreshToken != null) {
+                            tokenManager.saveRefreshToken(loginResponse.refreshToken)
+                        }
+                        _loginState.value = ApiResponse.Success(Unit)
+                    } else {
+                        _loginState.value = ApiResponse.Error("Server returned empty token")
+                    }
                 } else {
                     _loginState.value = ApiResponse.Error("Login failed: ${response.message()}")
                 }

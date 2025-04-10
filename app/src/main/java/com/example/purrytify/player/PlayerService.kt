@@ -3,6 +3,7 @@ package com.example.purrytify.player
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import android.app.Service
 
 class PlayerService : Service() {
     private val binder = PlayerBinder(this)
