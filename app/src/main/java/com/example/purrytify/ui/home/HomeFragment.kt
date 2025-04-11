@@ -16,8 +16,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-
-    // Fix the ViewModel reference
     private val viewModel by viewModels<HomeViewModel>()
 
     private lateinit var recentSongsAdapter: SongAdapter

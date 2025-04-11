@@ -21,7 +21,7 @@ class ProfileViewModel @Inject constructor(
     fun loadProfile() {
         viewModelScope.launch {
             _profile.value = ApiResponse.Loading
-            _profile.value = userRepository.getProfile() // Already returns ApiResponse<User>
+            _profile.value = userRepository.getProfile()
         }
     }
 }

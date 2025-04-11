@@ -32,7 +32,7 @@ class AuthViewModel @Inject constructor(
                 if (response.isSuccessful) {
                     val loginResponse = response.body()
 
-                    // Add null check here:
+
                     if (loginResponse?.accessToken != null) {
                         tokenManager.saveAccessToken(loginResponse.accessToken)
                         if (loginResponse.refreshToken != null) {

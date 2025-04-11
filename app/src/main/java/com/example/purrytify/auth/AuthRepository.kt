@@ -9,7 +9,6 @@ class AuthRepository @Inject constructor(
     private val tokenManager: TokenManager
 ) {
     suspend fun logout() {
-        // Add any API logout call if needed
         tokenManager.clearTokens()
     }
 }

@@ -39,19 +39,18 @@ class PlayerViewModel @Inject constructor(
         musicPlayer.seekTo(position)
     }
 
-    // Update the toggleLike function to accept a Song parameter
+
     fun toggleLike(song: Song) {
         viewModelScope.launch {
             songRepository.updateSong(song.copy(isLiked = !song.isLiked))
         }
     }
 
-    // Add a parameterless version for toggling the current song
+
     fun toggleLike() {
         viewModelScope.launch {
             currentSong.value?.let { song ->
                 songRepository.updateSong(song.copy(isLiked = !song.isLiked))
-                // Update the current song
                 _currentSong.value = song.copy(isLiked = !song.isLiked)
             }
         }

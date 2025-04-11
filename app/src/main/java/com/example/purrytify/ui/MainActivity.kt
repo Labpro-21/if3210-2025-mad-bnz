@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupMiniPlayer() {
-        // Mini player logic would go here
+        // Mini player logic needed
         playerViewModel.currentSong.observe(this) { song ->
             // Update mini player when song changes
         }

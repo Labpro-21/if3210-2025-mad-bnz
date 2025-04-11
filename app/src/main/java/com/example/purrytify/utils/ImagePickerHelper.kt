@@ -19,7 +19,7 @@ class ImagePickerHelper(
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
-                // Take persistent URI permission for this URI
+
                 val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 fragment.requireContext().contentResolver.takePersistableUriPermission(uri, flags)
 
@@ -49,7 +49,7 @@ class ImagePickerHelper(
         this.onImageSelected = callback
     }
 
-    // Method to get the current callback
+
     fun getCallback(): (Uri) -> Unit {
         return onImageSelected
     }

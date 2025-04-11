@@ -65,22 +65,18 @@ class FilePickerHelper(private val fragment: Fragment, private var onSongImporte
         val retriever = MediaMetadataRetriever()
         try {
             retriever.setDataSource(fragment.requireContext(), uri)
-
-            // Extract metadata
             val title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: "Unknown Title"
             val artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: "Unknown Artist"
             val albumArt = retriever.embeddedPicture
-
-            // Save album art if available
             var albumArtPath = ""
             if (albumArt != null) {
-                // Save the album art to app's files directory
+
                 val albumArtFile = File(fragment.requireContext().filesDir, "album_art_${UUID.randomUUID()}.jpg")
                 albumArtFile.writeBytes(albumArt)
                 albumArtPath = albumArtFile.absolutePath
             }
 
-            // Get persistent URI permission
+
             fragment.requireContext().contentResolver.takePersistableUriPermission(
                 uri,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION

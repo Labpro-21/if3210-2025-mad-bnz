@@ -43,7 +43,6 @@ class HomeViewModel @Inject constructor(
     private fun loadUserInfo() {
         viewModelScope.launch {
             try {
-                // Using getProfile() instead of getUserProfile()
                 val response = userRepository.getProfile()
                 if (response is ApiResponse.Success) {
                     _userInfo.value = response.data
@@ -59,7 +58,7 @@ class HomeViewModel @Inject constructor(
     private fun loadRecentlyPlayedSongs() {
         viewModelScope.launch {
             try {
-                // Using getAllSongs() or another appropriate method
+
                 songRepository.getAllSongs().collect { songs ->
                     _recentlyPlayedSongs.value = songs.sortedByDescending { it.lastPlayed }
                         .take(10)
@@ -73,7 +72,7 @@ class HomeViewModel @Inject constructor(
     private fun loadNewReleases() {
         viewModelScope.launch {
             try {
-                // Using getAllSongs() with filtering for new songs
+
                 songRepository.getAllSongs().collect { songs ->
                     _newReleaseSongs.value = songs.sortedByDescending { it.id }
                         .take(10)
@@ -87,7 +86,7 @@ class HomeViewModel @Inject constructor(
     private fun loadRecommendedSongs() {
         viewModelScope.launch {
             try {
-                // Using getLikedSongs() as shown in your code
+
                 songRepository.getLikedSongs().collect { songs ->
                     _recommendedSongs.value = songs
                 }

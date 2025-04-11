@@ -33,7 +33,7 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    // Flow collection looks correct
+
     viewLifecycleOwner.lifecycleScope.launch {
         viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.userEmail.collect { email ->
@@ -44,14 +44,9 @@ class SettingsFragment : Fragment() {
 
     binding.btnLogout.setOnClickListener {
         viewModel.logout()
-        // Use the correct ID from your navigation graph
+
         findNavController().navigate(R.id.action_settingsFragment_to_loginActivity)
-        
-        // Or use the activity ID directly
-        // findNavController().navigate(R.id.login_activity)
-        
-        // Or use the global action
-        // findNavController().navigate(R.id.navigation_to_login)
+
     }
 }
 

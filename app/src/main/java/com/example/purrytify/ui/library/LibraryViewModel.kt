@@ -15,10 +15,10 @@ class LibraryViewModel @Inject constructor(
     private val _currentTab = MutableLiveData(0)
     val currentTab: LiveData<Int> = _currentTab
 
-    // Add this for search functionality
+
     private val _searchQuery = MutableLiveData("")
 
-    // Modified songs LiveData to handle both tabs and search
+
     val songs = _currentTab.switchMap { tab ->
         _searchQuery.switchMap { query ->
             when {

@@ -136,7 +136,6 @@ class LibraryFragment : Fragment() {
         val originalCallback = filePickerHelper.getCallback()
 
         dialogBinding.btnSelectAudio.setOnClickListener {
-            // Use the EXISTING filePickerHelper instance with a temporary callback
             filePickerHelper.setCallback { song ->
                 selectedAudioUri = Uri.parse(song.path)
                 dialogBinding.etTitle.setText(song.title)
@@ -155,12 +154,12 @@ class LibraryFragment : Fragment() {
             filePickerHelper.pickAudioFile()
         }
 
-        // Save original image picker callback
+
         val originalImageCallback = imagePickerHelper.getCallback()
 
-        // Set up cover selection button
+
         dialogBinding.btnSelectCover.setOnClickListener {
-            // Use the EXISTING imagePickerHelper with a temporary callback
+
             imagePickerHelper.setCallback { uri ->
                 selectedImageUri = uri
                 dialogBinding.etAlbumArtUrl.setText(uri.toString())
@@ -200,13 +199,13 @@ class LibraryFragment : Fragment() {
             dialog.dismiss()
         }
         dialogBinding.btnCancel.setOnClickListener {
-            // Restore original callbacks before dismissing
+
             filePickerHelper.setCallback(originalCallback)
             imagePickerHelper.setCallback(originalImageCallback)
             dialog.dismiss()
         }
 
-        // Add dialog dismiss listener to restore callbacks if dialog is canceled
+
         dialog.setOnDismissListener {
             filePickerHelper.setCallback(originalCallback)
             imagePickerHelper.setCallback(originalImageCallback)
