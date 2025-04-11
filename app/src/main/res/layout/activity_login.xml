@@ -1,112 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
-    android:padding="32dp">
+    android:background="@drawable/login_gradient_background"
+    tools:context=".auth.LoginActivity">
 
     <ImageView
+        android:id="@+id/iv_logo"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:src="@drawable/ic_logo"
-        app:layout_constraintBottom_toTopOf="@id/til_email"
+        android:layout_marginTop="72dp"
+        android:contentDescription="@string/app_name"
+        android:src="@mipmap/ic_purrytify_logo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/tv_app_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Purrytify"
+        android:text="@string/app_name"
         android:textColor="@color/white"
         android:textSize="32sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_title"
-        />
+        app:layout_constraintTop_toBottomOf="@id/iv_logo" />
+
+    <TextView
+        android:id="@+id/tv_slogan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Music for your soul"
+        android:textColor="#CCFFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_app_name" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_email"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
         android:layout_marginTop="48dp"
-        android:hint="Email"
-        app:boxBackgroundColor="@color/dark_gray"
+        android:textColorHint="#CCFFFFFF"
+        app:boxBackgroundColor="#33FFFFFF"
         app:boxCornerRadiusBottomEnd="8dp"
         app:boxCornerRadiusBottomStart="8dp"
         app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusTopStart="8dp"
-        app:boxStrokeColor="@color/gray"
-        app:hintTextColor="@color/gray"
-        app:layout_constraintTop_toBottomOf="@id/tv_title">
+        app:boxStrokeColor="@color/spotify_green"
+        app:boxStrokeWidth="1dp"
+        app:hintTextColor="@color/spotify_green"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_slogan">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="Email or username"
             android:inputType="textEmailAddress"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_password"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
         android:layout_marginTop="16dp"
-        android:hint="Password"
-        app:boxBackgroundColor="@color/dark_gray"
+        android:textColorHint="#CCFFFFFF"
+        app:boxBackgroundColor="#33FFFFFF"
         app:boxCornerRadiusBottomEnd="8dp"
         app:boxCornerRadiusBottomStart="8dp"
         app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusTopStart="8dp"
-        app:boxStrokeColor="@color/gray"
-        app:hintTextColor="@color/gray"
-        app:layout_constraintTop_toBottomOf="@id/til_email">
+        app:boxStrokeColor="@color/spotify_green"
+        app:boxStrokeWidth="1dp"
+        app:hintTextColor="@color/spotify_green"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/til_email"
+        app:passwordToggleEnabled="true"
+        app:passwordToggleTint="@color/white">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="Password"
             android:inputType="textPassword"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_login"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
         android:layout_marginTop="32dp"
-        android:text="Log In"
-        android:textColor="@color/white"
-        app:backgroundTint="@color/purple_200"
-        app:cornerRadius="8dp"
-        app:layout_constraintTop_toBottomOf="@id/til_password"/>
+        android:backgroundTint="@color/spotify_green"
+        android:text="LOG IN"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        app:cornerRadius="30dp"
+        app:layout_constraintEnd_toEndOf="@id/til_password"
+        app:layout_constraintStart_toStartOf="@id/til_password"
+        app:layout_constraintTop_toBottomOf="@id/til_password" />
 
     <ProgressBar
         android:id="@+id/progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/btn_login"
         app:layout_constraintEnd_toEndOf="@id/btn_login"
         app:layout_constraintStart_toStartOf="@id/btn_login"
-        app:layout_constraintTop_toTopOf="@id/btn_login"/>
+        app:layout_constraintTop_toTopOf="@id/btn_login" />
 
-<!--    <TextView-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginTop="16dp"-->
-<!--&lt;!&ndash;        android:text="Don't have an account? Sign up"&ndash;&gt;-->
-<!--&lt;!&ndash;        android:textColor="@color/gray"&ndash;&gt;-->
-<!--&lt;!&ndash;        app:layout_constraintEnd_toEndOf="parent"&ndash;&gt;-->
-<!--&lt;!&ndash;        app:layout_constraintStart_toStartOf="parent"&ndash;&gt;-->
-<!--        app:layout_constraintTop_toBottomOf="@id/btn_login"/>-->
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

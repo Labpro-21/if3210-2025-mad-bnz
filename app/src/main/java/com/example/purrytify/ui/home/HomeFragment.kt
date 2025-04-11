@@ -1,4 +1,5 @@
 package com.example.purrytify.ui.home
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -6,8 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.purrytify.R
 import com.example.purrytify.databinding.FragmentHomeBinding
+import com.example.purrytify.ui.HomeViewModel
 import com.example.purrytify.ui.library.SongAdapter
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -15,7 +16,10 @@ import dagger.hilt.android.AndroidEntryPoint
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: HomeViewModel by viewModels()
+
+    // Fix the ViewModel reference
+    private val viewModel by viewModels<HomeViewModel>()
+
     private lateinit var recentSongsAdapter: SongAdapter
     private lateinit var newSongsAdapter: SongAdapter
 
@@ -57,23 +61,23 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupRecyclerViews() {
-        binding.rvRecentlyPlayed.apply {
+        binding.rvRecentlyPlayed?.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = recentSongsAdapter
         }
 
-        binding.rvNewSongs.apply {
+        binding.rvNewSongs?.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = newSongsAdapter
         }
     }
 
     private fun observeViewModel() {
-        viewModel.recentlyPlayed.observe(viewLifecycleOwner) { songs ->
+        viewModel.recentlyPlayedSongs.observe(viewLifecycleOwner) { songs ->
             recentSongsAdapter.submitList(songs)
         }
 
-        viewModel.newSongs.observe(viewLifecycleOwner) { songs ->
+        viewModel.newReleaseSongs.observe(viewLifecycleOwner) { songs ->
             newSongsAdapter.submitList(songs)
         }
     }
