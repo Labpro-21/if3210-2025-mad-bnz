@@ -133,7 +133,7 @@
         android:orientation="horizontal">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_select_audio"
+            android:id="@+id/btnSelectAudio"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="56dp"
@@ -149,7 +149,7 @@
             android:layout_height="match_parent" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_select_cover"
+            android:id="@+id/btnSelectCover"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="56dp"
@@ -189,7 +189,7 @@
         android:orientation="horizontal">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_cancel"
+            android:id="@+id/btnCancel"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -198,7 +198,7 @@
             android:textColor="@color/white" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_add"
+            android:id="@+id/btnAdd"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

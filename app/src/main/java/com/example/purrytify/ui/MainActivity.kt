@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNavigation() {
-        // This is the correct way to get the NavController when using FragmentContainerView
+
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
         if (navHostFragment != null) {
             val navController = navHostFragment.navController

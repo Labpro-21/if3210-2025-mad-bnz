@@ -14,7 +14,7 @@ import com.example.purrytify.model.Song
 import java.io.File
 import java.util.UUID
 
-class FilePickerHelper(private val fragment: Fragment, private val onSongImported: (Song) -> Unit) {
+class FilePickerHelper(private val fragment: Fragment, private var onSongImported: (Song) -> Unit) {
 
     private val audioPickerLauncher = fragment.registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -35,6 +35,14 @@ class FilePickerHelper(private val fragment: Fragment, private val onSongImporte
         } else {
             fragment.requireContext().showToast("Storage permission denied")
         }
+    }
+
+    fun setCallback(callback: (Song) -> Unit) {
+        this.onSongImported = callback
+    }
+
+    fun getCallback(): (Song) -> Unit {
+        return onSongImported
     }
 
     fun pickAudioFile() {
