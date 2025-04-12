@@ -8,6 +8,7 @@ import com.example.purrytify.model.Song
 import com.example.purrytify.repository.SongRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,7 +23,6 @@ class PlayerViewModel @Inject constructor(
     private val _currentSong = MutableLiveData<Song?>()
     val currentSong: LiveData<Song?> = _currentSong
 
-    // Current playlist
     private val _playlist = MutableLiveData<List<Song>>(emptyList())
     val playlist: LiveData<List<Song>> = _playlist
 
@@ -30,10 +30,20 @@ class PlayerViewModel @Inject constructor(
     val currentPosition = musicPlayer.currentPosition
     val songDuration = musicPlayer.songDuration
 
+    private val _likedSongs = MutableLiveData<List<Song>>(emptyList())
+    val likedSongs: LiveData<List<Song>> = _likedSongs
+
+    init {
+        viewModelScope.launch {
+            songRepository.getLikedSongs().collectLatest { songs ->
+                _likedSongs.postValue(songs)
+            }
+        }
+    }
+
     fun preload() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                // Initialize any resources needed
                 musicPlayerManager.initialize()
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -67,7 +77,8 @@ class PlayerViewModel @Inject constructor(
 
     fun toggleLike(song: Song) {
         viewModelScope.launch {
-            songRepository.updateSong(song.copy(isLiked = !song.isLiked))
+            val updatedSong = song.copy(isLiked = !song.isLiked)
+            songRepository.updateSong(updatedSong)
         }
     }
 
@@ -78,6 +89,16 @@ class PlayerViewModel @Inject constructor(
                 _currentSong.value = song.copy(isLiked = !song.isLiked)
             }
         }
+    }
+    fun isLiked(songId: String): LiveData<Boolean> {
+        val result = MutableLiveData<Boolean>(false)
+
+        viewModelScope.launch {
+            val isLiked = songRepository.getSongById(songId)?.isLiked ?: false
+            result.postValue(isLiked)
+        }
+
+        return result
     }
 
 

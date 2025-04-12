@@ -40,7 +40,6 @@ class MusicPlayer @Inject constructor(private val context: Context) {
                 }
                 setOnCompletionListener {
                     _isPlaying.value = false
-                    // Auto play next song if available
                 }
                 setOnErrorListener { _, what, extra ->
                     Log.e("MusicPlayer", "MediaPlayer error: $what, $extra")

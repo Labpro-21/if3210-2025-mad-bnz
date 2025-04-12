@@ -65,6 +65,9 @@ class PlayerFragment : Fragment() {
         binding.btnPlayPause.setOnClickListener {
             musicPlayerManager.togglePlayPause()
         }
+        binding.btnLike.setOnClickListener{
+            playerViewModel.toggleLike()
+        }
         setupUI()
         observeViewModel()
         observePlayerState()
@@ -85,6 +88,20 @@ class PlayerFragment : Fragment() {
                 playerViewModel.toggleLike(song)
             }
         }
+        binding.btnNext.setOnClickListener {
+            musicPlayerManager.playNextSong()
+        }
+
+        binding.btnPrevious.setOnClickListener {
+            musicPlayerManager.playPreviousSong()
+        }
+
+        binding.btnLike.setOnClickListener {
+            musicPlayerManager.currentSong.value?.let { currentSong ->
+                playerViewModel.toggleLike(currentSong)
+            }
+        }
+
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
@@ -130,12 +147,24 @@ class PlayerFragment : Fragment() {
                 else R.drawable.ic_play
             )
         }
+        playerViewModel.likedSongs.observe(viewLifecycleOwner) { likedSongs ->
+            musicPlayerManager.currentSong.value?.let { currentSong ->
+                val isLiked = likedSongs.any { it.id == currentSong.id }
+                updateLikeButtonState(isLiked)
+            }
+        }
         playerViewModel.currentPosition.observe(viewLifecycleOwner) { position ->
             if (!binding.seekBar.isPressed) {
                 binding.seekBar.progress = position.toInt()
                 binding.tvCurrentTime.text = formatDuration(position)
             }
         }
+    }
+    private fun updateLikeButtonState(isLiked: Boolean) {
+        binding.btnLike.setImageResource(
+            if (isLiked) R.drawable.ic_liked
+            else R.drawable.ic_like
+        )
     }
 
     private fun setupSeekBar() {
@@ -189,6 +218,9 @@ class PlayerFragment : Fragment() {
             .placeholder(R.drawable.placeholder_album)
             .error(R.drawable.placeholder_album)
             .into(binding.ivAlbumArt)
+        playerViewModel.isLiked(song.id).observe(viewLifecycleOwner) { isLiked ->
+            updateLikeButtonState(isLiked)
+        }
     }
     private fun startTimeUpdate() {
         viewLifecycleOwner.lifecycleScope.launch {

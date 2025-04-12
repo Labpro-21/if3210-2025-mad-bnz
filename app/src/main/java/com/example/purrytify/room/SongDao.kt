@@ -29,8 +29,13 @@ interface SongDao {
     fun getNewSongs(): Flow<List<Song>>
 
     @Query("UPDATE songs SET lastPlayed = :timestamp WHERE id = :songId")
-    suspend fun updateLastPlayed(songId: String, timestamp: Long): Int  // Return number of rows updated
+    suspend fun updateLastPlayed(songId: String, timestamp: Long): Int
 
     @Query("DELETE FROM songs WHERE id = :songId")
-    suspend fun deleteSong(songId: String): Int  // Return number of rows deleted
+    suspend fun deleteSong(songId: String): Int
+
+    @Query("SELECT * FROM songs WHERE id = :songId")
+    suspend fun getSongById(songId: String): Song
+
+
 }

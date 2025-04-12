@@ -15,7 +15,6 @@ class SongRepository @Inject constructor(
     private val tokenManager: TokenManager
 ) {
     fun getAllSongs(): Flow<List<Song>> = songDao.getAllSongs()
-    fun getLikedSongs(): Flow<List<Song>> = songDao.getLikedSongs()
     fun getRecentlyPlayed(): Flow<List<Song>> = songDao.getRecentlyPlayed()
     fun getNewSongs(): Flow<List<Song>> = songDao.getNewSongs()
 
@@ -41,5 +40,12 @@ class SongRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             songDao.deleteSong(songId)
         }
+    }
+    suspend fun getLikedSongs(): Flow<List<Song>> {
+        return withContext(Dispatchers.IO){ songDao.getLikedSongs()}
+    }
+
+    suspend fun getSongById(id: String): Song? {
+        return withContext(Dispatchers.IO){songDao.getSongById(id)}
     }
 }
