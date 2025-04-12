@@ -70,6 +70,11 @@ class MusicPlayerManager @Inject constructor(
     }
 
     fun playSong(song: Song) {
+        val currentlyPlaying = _currentSong.value
+        if (currentlyPlaying?.id == song.id && mediaPlayer?.isPlaying == true) {
+            _isPlaying.postValue(true)
+            return
+        }
         _currentSong.postValue(song)
 
         val songIndex = _playlist.indexOfFirst { it.id == song.id }

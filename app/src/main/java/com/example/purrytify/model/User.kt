@@ -9,3 +9,8 @@ data class User(
     val createdAt: String,
     val updatedAt: String
 )
+data class UpdatePhotoResponse(
+    val success: Boolean,
+    val message: String,
+    val profilePhoto: String? = null
+)

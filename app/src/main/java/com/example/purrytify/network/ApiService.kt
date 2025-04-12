@@ -1,11 +1,15 @@
 package com.example.purrytify.network
 
+import com.example.purrytify.model.UpdatePhotoResponse
 import com.example.purrytify.model.User
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 
 interface ApiService {
     @POST("api/login")
@@ -19,6 +23,13 @@ interface ApiService {
 
     @POST("api/verify-token")
     suspend fun verifyToken(@Header("Authorization") token: String): Response<Unit>
+
+    @Multipart
+    @POST("api/profile/photo")
+    suspend fun updateProfilePhoto(
+        @Header("Authorization") token: String,
+        @Part photo: MultipartBody.Part
+    ): Response<UpdatePhotoResponse>
 }
 
 data class LoginRequest(

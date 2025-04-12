@@ -18,18 +18,26 @@ class ImagePickerHelper(
     private val imagePickerLauncher = fragment.registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
-
                 try {
+                    val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     fragment.requireContext().contentResolver.takePersistableUriPermission(
                         uri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        takeFlags
                     )
                 } catch (e: Exception) {
-                    Log.e("ImagePickerHelper", "Failed to get persistable permission", e)
+                    Log.e("ImagePickerHelper", "Failed to get persistent permission", e)
                 }
+
                 onImageSelected(uri)
+            } ?: run {
+                Toast.makeText(
+                    fragment.requireContext(),
+                    "Failed to select image",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }

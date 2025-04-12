@@ -66,6 +66,10 @@ class HomeFragment : BaseFragment() {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             adapter = newReleasesAdapter
         }
+        binding.tvUsername.setText(
+            "Hi Assistant!"
+        )
+        binding.ivProfile.setImageResource(R.drawable.ic_person)
 
 
         recentlyPlayedAdapter = SongHorizontalAdapter(
