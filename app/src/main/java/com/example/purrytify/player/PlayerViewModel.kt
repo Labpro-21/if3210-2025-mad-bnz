@@ -16,19 +16,16 @@ import javax.inject.Inject
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
     private val musicPlayer: MusicPlayer,
-    private val musicPlayerManager: MusicPlayerManager,
     private val songRepository: SongRepository
 ) : ViewModel() {
 
     private val _currentSong = MutableLiveData<Song?>()
     val currentSong: LiveData<Song?> = _currentSong
 
-    private val _playlist = MutableLiveData<List<Song>>(emptyList())
-    val playlist: LiveData<List<Song>> = _playlist
+
 
     val isPlaying = musicPlayer.isPlaying
     val currentPosition = musicPlayer.currentPosition
-    val songDuration = musicPlayer.songDuration
 
     private val _likedSongs = MutableLiveData<List<Song>>(emptyList())
     val likedSongs: LiveData<List<Song>> = _likedSongs
@@ -41,38 +38,8 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    fun preload() {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                musicPlayerManager.initialize()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    fun playSong(song: Song) {
-        _currentSong.value = song
-        musicPlayer.playSong(song)
-
-        viewModelScope.launch {
-            songRepository.updateLastPlayed(song.id, System.currentTimeMillis())
-
-
-            if (_playlist.value.isNullOrEmpty()) {
-
-                val songs = songRepository.getAllSongs().firstOrNull() ?: emptyList()
-                _playlist.postValue(songs)
-            }
-        }
-    }
-
     fun togglePlayPause() {
         musicPlayer.togglePlayPause()
-    }
-
-    fun seekTo(position: Int) {
-        musicPlayer.seekTo(position)
     }
 
     fun toggleLike(song: Song) {
@@ -101,32 +68,6 @@ class PlayerViewModel @Inject constructor(
         return result
     }
 
-
-    fun playNextSong() {
-        val currentPlaylist = _playlist.value ?: return
-        val currentSongIndex = currentPlaylist.indexOfFirst { it.id == currentSong.value?.id }
-
-        if (currentSongIndex != -1 && currentSongIndex < currentPlaylist.size - 1) {
-            val nextSong = currentPlaylist[currentSongIndex + 1]
-            playSong(nextSong)
-        } else if (currentPlaylist.isNotEmpty()) {
-
-            playSong(currentPlaylist[0])
-        }
-    }
-
-    fun playPreviousSong() {
-        val currentPlaylist = _playlist.value ?: return
-        val currentSongIndex = currentPlaylist.indexOfFirst { it.id == currentSong.value?.id }
-
-        if (currentSongIndex > 0) {
-            val previousSong = currentPlaylist[currentSongIndex - 1]
-            playSong(previousSong)
-        } else if (currentPlaylist.isNotEmpty()) {
-            // Loop to the last song if we're at the beginning
-            playSong(currentPlaylist.last())
-        }
-    }
 
     fun getCurrentPosition(): Int {
         return musicPlayer.getCurrentPosition()

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -94,6 +95,13 @@ class PlayerFragment : Fragment() {
 
         binding.btnPrevious.setOnClickListener {
             musicPlayerManager.playPreviousSong()
+        }
+
+        binding.btnShuffle.setOnClickListener {
+            musicPlayerManager.toggleShuffle()
+        }
+        binding.btnRepeat.setOnClickListener {
+            musicPlayerManager.toggleRepeat()
         }
 
         binding.btnLike.setOnClickListener {
@@ -208,6 +216,23 @@ class PlayerFragment : Fragment() {
             binding.tvTotalTime.text = formatTime(duration)
             binding.seekBar.max = duration
         }
+
+        musicPlayerManager.isShuffleEnabled.observe(viewLifecycleOwner) { isShuffleEnabled ->
+            binding.btnShuffle.setImageResource(
+                if (isShuffleEnabled) R.drawable.ic_shuffle_on else R.drawable.ic_shuffle
+            )
+        }
+
+        musicPlayerManager.repeatMode.observe(viewLifecycleOwner) { repeatMode ->
+            val iconRes = when (repeatMode) {
+                MusicPlayerManager.RepeatMode.OFF -> R.drawable.ic_repeat
+                MusicPlayerManager.RepeatMode.REPEAT_ALL -> R.drawable.ic_repeat_all
+                MusicPlayerManager.RepeatMode.REPEAT_ONE -> R.drawable.ic_repeat_one
+            }
+            binding.btnRepeat.setImageResource(iconRes)
+        }
+
+
     }
 
     private fun updateSongUI(song: Song) {

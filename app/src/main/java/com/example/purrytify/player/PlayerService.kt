@@ -20,12 +20,4 @@ class PlayerService : Service() {
         return super.onUnbind(intent)
     }
 
-    fun getMusicPlayer(): MusicPlayer = musicPlayer
-
-    companion object {
-        fun startService(context: Context) {
-            val intent = Intent(context, PlayerService::class.java)
-            context.startService(intent)
-        }
-    }
 }

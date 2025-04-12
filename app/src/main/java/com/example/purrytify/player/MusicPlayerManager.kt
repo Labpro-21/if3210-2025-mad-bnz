@@ -49,6 +49,19 @@ class MusicPlayerManager @Inject constructor(
     private val _currentPlaylist = MutableLiveData<List<Song>>(emptyList())
     val currentPlaylist: LiveData<List<Song>> = _currentPlaylist
 
+    private val _isShuffleEnabled = MutableLiveData<Boolean>(false)
+    val isShuffleEnabled: LiveData<Boolean> = _isShuffleEnabled
+
+    private val _repeatMode = MutableLiveData<RepeatMode>(RepeatMode.OFF)
+    val repeatMode: LiveData<RepeatMode> = _repeatMode
+
+    private val originalPlaylist = mutableListOf<Song>()
+
+    enum class RepeatMode {
+        OFF, REPEAT_ALL, REPEAT_ONE
+    }
+
+
     fun initialize() {
         if (!isInitialized) {
             isInitialized = true
@@ -81,6 +94,7 @@ class MusicPlayerManager @Inject constructor(
 
                 setOnCompletionListener {
                     _isPlaying.postValue(false)
+                    playNextSong()
                 }
 
                 setOnErrorListener { _, what, extra ->
@@ -94,62 +108,112 @@ class MusicPlayerManager @Inject constructor(
             _isPlaying.postValue(false)
         }
     }
-    fun setPlaylist(songs: List<Song>, startSongId: String? = null) {
-        _playlist.clear()
-        _playlist.addAll(songs)
-        _currentPlaylist.postValue(_playlist.toList())
-        currentIndex = if (startSongId != null) {
-            val index = _playlist.indexOfFirst { it.id == startSongId }
-            if (index != -1) index else 0
-        } else {
-            0
-        }
-        Log.d("MusicPlayerManager", "Playlist updated with ${songs.size} songs, starting at index $currentIndex")
+
+    fun toggleShuffle() {
+        val newValue = !(_isShuffleEnabled.value ?: false)
+        _isShuffleEnabled.postValue(newValue)
+        Log.d("MusicPlayerManager", "Shuffle ${if (newValue) "enabled" else "disabled"}")
     }
+
+    fun toggleRepeat() {
+        val currentMode = _repeatMode.value ?: RepeatMode.OFF
+        val nextMode = when (currentMode) {
+            RepeatMode.OFF -> RepeatMode.REPEAT_ALL
+            RepeatMode.REPEAT_ALL -> RepeatMode.REPEAT_ONE
+            RepeatMode.REPEAT_ONE -> RepeatMode.OFF
+        }
+        _repeatMode.postValue(nextMode)
+        Log.d("MusicPlayerManager", "Repeat mode changed to: $nextMode")
+    }
+
+
     fun playNextSong() {
         viewModelScope.launch {
-            val currentSongId = _currentSong.value?.id ?: return@launch
+            val currentSong = _currentSong.value ?: return@launch
+            if (_repeatMode.value == RepeatMode.REPEAT_ONE) {
+                mediaPlayer?.seekTo(0)
+                mediaPlayer?.start()
+                _isPlaying.postValue(true)
+                return@launch
+            }
 
-            songRepository.getAllSongs().first()?.let { songs ->
-                val currentIndex = songs.indexOfFirst { it.id == currentSongId }
-                if (currentIndex == -1) return@launch
-                val nextSong = if (currentIndex < songs.size - 1) {
-                    songs[currentIndex + 1]
-                } else {
-                    songs.firstOrNull()
+            try {
+                val allSongs = songRepository.getAllSongs().first()
+
+                if (allSongs.isEmpty()) {
+                    Log.d("MusicPlayerManager", "No songs available in repository")
+                    return@launch
+                }
+                val currentIndex = allSongs.indexOfFirst { it.id == currentSong.id }
+                val nextSong = when {
+                    _isShuffleEnabled.value == true -> {
+                        val availableSongs = if (allSongs.size > 1) {
+                            allSongs.filter { it.id != currentSong.id }
+                        } else {
+                            allSongs
+                        }
+                        availableSongs.random()
+                    }
+                    currentIndex < allSongs.size - 1 -> allSongs[currentIndex + 1]
+                    _repeatMode.value == RepeatMode.REPEAT_ALL -> allSongs.firstOrNull()
+                    else -> null
                 }
                 nextSong?.let {
                     playSong(it)
+                    Log.d("MusicPlayerManager", "Playing next song: ${it.title}")
                 }
+            } catch (e: Exception) {
+                Log.e("MusicPlayerManager", "Error playing next song", e)
             }
         }
     }
 
+
     fun playPreviousSong() {
         viewModelScope.launch {
-            val currentSongId = _currentSong.value?.id ?: return@launch
+            val currentSong = _currentSong.value ?: return@launch
             if (getCurrentPosition() > 3000) {
                 mediaPlayer?.seekTo(0)
                 return@launch
             }
-            songRepository.getAllSongs().first()?.let { songs ->
-                val currentIndex = songs.indexOfFirst { it.id == currentSongId }
-                if (currentIndex == -1) return@launch
-                val previousSong = if (currentIndex > 0) {
-                    songs[currentIndex - 1]
-                } else {
-                    songs.lastOrNull()
+            if (_repeatMode.value == RepeatMode.REPEAT_ONE) {
+                mediaPlayer?.seekTo(0)
+                mediaPlayer?.start()
+                _isPlaying.postValue(true)
+                return@launch
+            }
+
+            try {
+                val allSongs = songRepository.getAllSongs().first()
+
+                if (allSongs.isEmpty()) {
+                    Log.d("MusicPlayerManager", "No songs available in repository")
+                    return@launch
+                }
+                val currentIndex = allSongs.indexOfFirst { it.id == currentSong.id }
+                val previousSong = when {
+                    _isShuffleEnabled.value == true -> {
+                        val availableSongs = if (allSongs.size > 1) {
+                            allSongs.filter { it.id != currentSong.id }
+                        } else {
+                            allSongs
+                        }
+                        availableSongs.random()
+                    }
+                    currentIndex > 0 -> allSongs[currentIndex - 1]
+                    _repeatMode.value == RepeatMode.REPEAT_ALL -> allSongs.lastOrNull()
+                    else -> null
                 }
                 previousSong?.let {
                     playSong(it)
+                    Log.d("MusicPlayerManager", "Playing previous song: ${it.title}")
                 }
+            } catch (e: Exception) {
+                Log.e("MusicPlayerManager", "Error playing previous song", e)
             }
         }
     }
 
-    fun getPlaylist(): List<Song> {
-        return _playlist.toList()
-    }
 
     fun togglePlayPause() {
         mediaPlayer?.let { player ->

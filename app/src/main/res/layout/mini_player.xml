@@ -4,19 +4,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/miniPlayerLayout"
     android:layout_width="match_parent"
-    android:layout_height="56dp"
-    android:background="#333333"
+    android:layout_height="64dp"
+    android:background="@drawable/mini_player_gradient"
     android:clickable="true"
     android:focusable="true"
+    android:elevation="12dp"
     android:visibility="gone"
     tools:visibility="visible">
 
     <ImageView
         android:id="@+id/miniPlayerCover"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
         android:scaleType="centerCrop"
+        android:background="@drawable/round_corners"
+        android:elevation="2dp"
+
+        android:adjustViewBounds="true"
+        android:cropToPadding="true"
+        android:padding="0dp"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -26,18 +34,20 @@
         android:id="@+id/miniPlayerTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/white"
-        android:textSize="14sp"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:letterSpacing="-0.01"
         app:layout_constraintBottom_toTopOf="@+id/miniPlayerArtist"
         app:layout_constraintEnd_toStartOf="@+id/minibtnPlayPause"
         app:layout_constraintStart_toEndOf="@+id/miniPlayerCover"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
-        tools:text="Song Title" />
+        tools:text="Blinding Lights" />
 
     <TextView
         android:id="@+id/miniPlayerArtist"
@@ -45,31 +55,52 @@
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textColor="#AAAAAA"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:textColor="#B3FFFFFF"
+        android:textSize="14sp"
+        android:alpha="0.8"
+        app:layout_constraintBottom_toTopOf="@+id/miniPlayerProgress"
         app:layout_constraintEnd_toEndOf="@+id/miniPlayerTitle"
         app:layout_constraintStart_toStartOf="@+id/miniPlayerTitle"
         app:layout_constraintTop_toBottomOf="@+id/miniPlayerTitle"
-        tools:text="Artist Name" />
+        tools:text="The Weeknd" />
+
 
     <ImageButton
         android:id="@+id/minibtnPlayPause"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="16dp"
+        android:layout_width="40dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="12dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Play/Pause"
         android:src="@drawable/ic_play"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/minibtnNext"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/white" />
 
-    <View
+
+    <ImageButton
+        android:id="@+id/minibtnNext"
+        android:layout_width="40dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Next Song"
+        android:src="@drawable/ic_skip_next"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white" />
+    <ProgressBar
+        android:id="@+id/miniPlayerProgress"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#444444"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:layout_height="2dp"
+        android:progressTint="#1DB954"
+        android:progressBackgroundTint="#4D4D4D"
+        android:layout_marginTop="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

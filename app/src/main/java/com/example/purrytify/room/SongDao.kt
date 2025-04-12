@@ -37,5 +37,7 @@ interface SongDao {
     @Query("SELECT * FROM songs WHERE id = :songId")
     suspend fun getSongById(songId: String): Song
 
+    @Query("SELECT * FROM songs WHERE lastPlayed > 0")
+    fun getPlayedSongs(): Flow<List<Song>>
 
 }

@@ -60,6 +60,9 @@ class ProfileFragment : Fragment() {
         viewModel.likedSongs.observe(viewLifecycleOwner) { count ->
             binding.tvLikedSongs.text = count.toString()
         }
+        viewModel.listenedSongs.observe(viewLifecycleOwner) { count ->
+            binding.tvListenedSongs.text = count.toString()
+        }
 
     }
     private fun showProfile(user: User) {

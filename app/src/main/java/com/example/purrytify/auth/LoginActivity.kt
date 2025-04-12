@@ -37,7 +37,7 @@ class LoginActivity : AppCompatActivity() {
             val password = binding.etPassword.text.toString().trim()
 
             if (email.isEmpty() || password.isEmpty()) {
-                showToast("Email dan password harus diisi")
+                showToast("Email and password must be filled")
                 return@setOnClickListener
             }
 

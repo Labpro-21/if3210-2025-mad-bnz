@@ -15,5 +15,6 @@
     <color name="gray_100">#F5F5F5</color>
     <color name="gray_800">#333333</color>
     <color name="gray_900">#212121</color>
+    <color name="mini_player_bg">#282828</color>
 
 </resources>

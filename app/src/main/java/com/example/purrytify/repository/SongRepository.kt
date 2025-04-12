@@ -48,4 +48,7 @@ class SongRepository @Inject constructor(
     suspend fun getSongById(id: String): Song? {
         return withContext(Dispatchers.IO){songDao.getSongById(id)}
     }
+    fun getPlayedSongs(): Flow<List<Song>> {
+        return songDao.getPlayedSongs()
+    }
 }

@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +22,7 @@ import com.example.purrytify.player.MusicPlayerManager
 import com.example.purrytify.player.PlayerViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -52,6 +54,7 @@ class MainActivity : AppCompatActivity() {
             }
             val miniPlayer = findViewById<ConstraintLayout>(R.id.miniPlayerLayout)
             val playPauseButton = findViewById<ImageView>(R.id.minibtnPlayPause)
+            val nextButton = findViewById<ImageView>(R.id.minibtnNext)
             val miniPlayerTitle = findViewById<TextView>(R.id.miniPlayerTitle)
             val miniPlayerArtist = findViewById<TextView>(R.id.miniPlayerArtist)
 
@@ -80,6 +83,9 @@ class MainActivity : AppCompatActivity() {
                 playPauseButton.setOnClickListener {
                     musicPlayerManager.togglePlayPause()
                 }
+                nextButton.setOnClickListener{
+                    musicPlayerManager.playNextSong()
+                }
             } else {
                 Log.e("MainActivity", "Mini player views not found in layout")
             }
@@ -91,6 +97,7 @@ class MainActivity : AppCompatActivity() {
         val songTitle = findViewById<TextView>(R.id.miniPlayerTitle)
         val artistName = findViewById<TextView>(R.id.miniPlayerArtist)
         val coverImage = findViewById<ImageView>(R.id.miniPlayerCover)
+        val progressBar = findViewById<ProgressBar>(R.id.miniPlayerProgress)
 
         songTitle.text = song.title
         artistName.text = song.artist
@@ -98,6 +105,19 @@ class MainActivity : AppCompatActivity() {
             .load(song.coverUrl)
             .placeholder(R.drawable.ic_placeholder_album)
             .into(coverImage)
+
+        lifecycleScope.launch {
+            while (true) {
+                if (musicPlayerManager.isPlaying.value == true) {
+                    val position = musicPlayerManager.getCurrentPosition()
+                    val duration = musicPlayerManager.getDuration()
+                    if (duration > 0) {
+                        progressBar.progress = (position * 100 / duration)
+                    }
+                }
+                delay(1000)
+            }
+        }
     }
     private fun updatePlayPauseButton(button: ImageView) {
         musicPlayerManager.isPlaying.observe(this) { isPlaying ->

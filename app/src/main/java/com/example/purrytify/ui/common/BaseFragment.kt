@@ -32,35 +32,24 @@ abstract class BaseFragment : Fragment() {
             val miniPlayerView = rootView.findViewById<View>(R.id.miniPlayerLayout)
             if (miniPlayerView != null) {
                 miniPlayer = MiniPlayerBinding.bind(miniPlayerView)
-
-                // Observe current playing song
                 musicPlayerManager.currentSong.observe(viewLifecycleOwner) { song ->
                     if (song != null) {
-                        // Update visibility and content in a UI-safe way
                         lifecycleScope.launch {
                             miniPlayer?.apply {
                                 miniPlayerLayout.visibility = View.VISIBLE
                                 miniPlayerTitle.text = song.title
                                 miniPlayerArtist.text = song.artist
-
-                                // Load album cover in background thread
                                 withContext(Dispatchers.IO) {
                                     val bitmap = try {
-                                        // Load bitmap in background
-                                        null  // Replace with actual loading
+
+                                        null
                                     } catch (e: Exception) {
                                         null
                                     }
-
-                                    // Update UI on main thread
                                     withContext(Dispatchers.Main) {
-                                        // Use Glide or set bitmap directly
                                     }
                                 }
-
-                                // Set click listeners
                                 root.setOnClickListener {
-                                    // Navigate to player using direct resource ID
                                     findNavController().navigate(R.id.playerFragment)
                                 }
 
@@ -73,14 +62,11 @@ abstract class BaseFragment : Fragment() {
                         miniPlayer?.miniPlayerLayout?.visibility = View.GONE
                     }
                 }
-
-                // Observe play state changes
                 musicPlayerManager.isPlaying.observe(viewLifecycleOwner) { isPlaying ->
                     updatePlayPauseButton(isPlaying)
                 }
             }
         } catch (e: Exception) {
-            // Log exception but don't crash the app
             e.printStackTrace()
         }
     }
