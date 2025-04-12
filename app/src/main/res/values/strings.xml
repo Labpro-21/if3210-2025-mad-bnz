@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">purritify</string>
+    <string name="no_internet_connection">No Internet Connection</string>
+    <string name="no_internet_description">Please check your internet connection and try again. You can still play your local songs offline.</string>
+    <string name="retry">Retry</string>
 </resources>
