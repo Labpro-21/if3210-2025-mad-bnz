@@ -11,6 +11,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.example.purrytify.model.Song
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
 
@@ -21,8 +25,17 @@ class FilePickerHelper(private val fragment: Fragment, private var onSongImporte
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
-                val song = extractMetadata(uri)
-                onSongImported(song)
+                CoroutineScope(Dispatchers.IO).launch{
+                    val contentResolver = fragment.requireContext().contentResolver
+                    contentResolver.takePersistableUriPermission(
+                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                    val song = extractMetadata(uri)
+                    withContext(Dispatchers.Main) {
+                        onSongImported(song)
+                    }
+                }
+
             }
         }
     }

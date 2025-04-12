@@ -4,21 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.purrytify.R
 import com.example.purrytify.databinding.FragmentSettingsBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class SettingsFragment : Fragment() {
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
+
     private val viewModel: SettingsViewModel by viewModels()
 
     override fun onCreateView(
@@ -31,24 +29,46 @@ class SettingsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    super.onViewCreated(view, savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
 
+        setupBackButton()
+        setupSettingsOptions()
+    }
 
-    viewLifecycleOwner.lifecycleScope.launch {
-        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            viewModel.userEmail.collect { email ->
-                binding.tvEmail.text = email ?: "No email available"
-            }
+    private fun setupBackButton() {
+        binding.btnBack.setOnClickListener {
+            findNavController().navigateUp()
         }
     }
 
-    binding.btnLogout.setOnClickListener {
-        viewModel.logout()
-
-        findNavController().navigate(R.id.action_settingsFragment_to_loginActivity)
-
+    private fun setupSettingsOptions() {
+        binding.optionAbout.setOnClickListener {
+            showAboutDialog()
+        }
+        binding.btnLogout.setOnClickListener {
+            showLogoutConfirmationDialog()
+        }
     }
-}
+
+    private fun showAboutDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("About Purrytify")
+            .setMessage("Version 1.0\n\nPurrytify is a music player app designed for MAD.")
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showLogoutConfirmationDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Logout")
+            .setMessage("Are you sure you want to logout?")
+            .setPositiveButton("Yes") { _, _ ->
+                viewModel.logout()
+                findNavController().navigate(R.id.action_settingsFragment_to_loginActivity)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

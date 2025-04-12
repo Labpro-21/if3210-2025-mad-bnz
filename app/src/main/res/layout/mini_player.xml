@@ -2,76 +2,74 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/miniPlayerLayout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="#1A1A1A"
-    android:padding="8dp">
+    android:layout_height="56dp"
+    android:background="#333333"
+    android:clickable="true"
+    android:focusable="true"
+    android:visibility="gone"
+    tools:visibility="visible">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/ivAlbumArt"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+    <ImageView
+        android:id="@+id/miniPlayerCover"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearanceOverlay="@style/RoundedImageView"
         tools:src="@drawable/placeholder_album" />
 
     <TextView
-        android:id="@+id/tvTitle"
+        android:id="@+id/miniPlayerTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/white"
         android:textSize="14sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/tvArtist"
-        app:layout_constraintEnd_toStartOf="@id/ivLike"
-        app:layout_constraintStart_toEndOf="@id/ivAlbumArt"
-        app:layout_constraintTop_toTopOf="@id/ivAlbumArt"
+        app:layout_constraintBottom_toTopOf="@+id/miniPlayerArtist"
+        app:layout_constraintEnd_toStartOf="@+id/minibtnPlayPause"
+        app:layout_constraintStart_toEndOf="@+id/miniPlayerCover"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
         tools:text="Song Title" />
 
     <TextView
-        android:id="@+id/tvArtist"
+        android:id="@+id/miniPlayerArtist"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textColor="#B3FFFFFF"
+        android:textColor="#AAAAAA"
         android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@id/ivAlbumArt"
-        app:layout_constraintEnd_toStartOf="@id/ivLike"
-        app:layout_constraintStart_toEndOf="@id/ivAlbumArt"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/miniPlayerTitle"
+        app:layout_constraintStart_toStartOf="@+id/miniPlayerTitle"
+        app:layout_constraintTop_toBottomOf="@+id/miniPlayerTitle"
         tools:text="Artist Name" />
 
-    <ImageView
-        android:id="@+id/ivLike"
+    <ImageButton
+        android:id="@+id/minibtnPlayPause"
         android:layout_width="32dp"
         android:layout_height="32dp"
+        android:layout_marginEnd="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:padding="6dp"
-        android:src="@drawable/ic_like"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/ivPlayPause"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/ivPlayPause"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:padding="6dp"
+        android:contentDescription="Play/Pause"
         android:src="@drawable/ic_play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#444444"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

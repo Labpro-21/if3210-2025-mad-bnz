@@ -6,20 +6,24 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.purrytify.R
 import com.example.purrytify.databinding.FragmentHomeBinding
+import com.example.purrytify.model.Song
 import com.example.purrytify.ui.HomeViewModel
+import com.example.purrytify.ui.common.BaseFragment
 import com.example.purrytify.ui.library.SongAdapter
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class HomeFragment : Fragment() {
+class HomeFragment : BaseFragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val viewModel by viewModels<HomeViewModel>()
 
-    private lateinit var recentSongsAdapter: SongAdapter
-    private lateinit var newSongsAdapter: SongAdapter
+    private val viewModel: HomeViewModel by viewModels()
+    private lateinit var newReleasesAdapter: SongAdapter
+    private lateinit var recentlyPlayedAdapter: SongHorizontalAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,49 +38,77 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupAdapters()
-        setupRecyclerViews()
         observeViewModel()
     }
 
     private fun setupAdapters() {
-        recentSongsAdapter = SongAdapter(
+        newReleasesAdapter = SongAdapter(
             onItemClick = { song ->
-                viewModel.playSong(song)
+                navigateToPlayer(song)
             },
             onLikeClick = { song ->
                 viewModel.toggleLike(song)
-            }
+            },
+            onPlayClick = { song ->
+                playSong(song)
+            },
+            musicPlayerManager = musicPlayerManager
+        )
+        musicPlayerManager.currentSong.observe(viewLifecycleOwner) { _ ->
+            newReleasesAdapter.notifyDataSetChanged()
+        }
+
+        musicPlayerManager.isPlaying.observe(viewLifecycleOwner) { _ ->
+            newReleasesAdapter.notifyDataSetChanged()
+        }
+
+        binding.rvNewSongs.apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            adapter = newReleasesAdapter
+        }
+
+
+        recentlyPlayedAdapter = SongHorizontalAdapter(
+            onItemClick = { song ->
+                navigateToPlayer(song)
+            },
+            onPlayClick = { song ->
+                playSong(song)
+            },
+            musicPlayerManager= musicPlayerManager
         )
 
-        newSongsAdapter = SongAdapter(
-            onItemClick = { song ->
-                viewModel.playSong(song)
-            },
-            onLikeClick = { song ->
-                viewModel.toggleLike(song)
+        musicPlayerManager.currentSong.observe(viewLifecycleOwner) { _ ->
+            recentlyPlayedAdapter.notifyDataSetChanged()
+        }
+
+        musicPlayerManager.isPlaying.observe(viewLifecycleOwner) { _ ->
+            recentlyPlayedAdapter.notifyDataSetChanged()
+        }
+
+            binding.rvRecentlyPlayed.apply {
+                layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+                adapter = recentlyPlayedAdapter
             }
+    }
+
+    private fun navigateToPlayer(song: Song) {
+        findNavController().navigate(
+            R.id.action_homeFragment_to_playerFragment
         )
     }
 
-    private fun setupRecyclerViews() {
-        binding.rvRecentlyPlayed?.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = recentSongsAdapter
-        }
-
-        binding.rvNewSongs?.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = newSongsAdapter
-        }
+    private fun playSong(song: Song) {
+        musicPlayerManager.playSong(song)
+        viewModel.playSong(song)
     }
 
     private fun observeViewModel() {
-        viewModel.recentlyPlayedSongs.observe(viewLifecycleOwner) { songs ->
-            recentSongsAdapter.submitList(songs)
-        }
-
         viewModel.newReleaseSongs.observe(viewLifecycleOwner) { songs ->
-            newSongsAdapter.submitList(songs)
+            newReleasesAdapter.submitList(songs)
+        }
+        viewModel.recentlyPlayedSongs.observe(viewLifecycleOwner) { songs ->
+            recentlyPlayedAdapter.submitList(songs)
         }
     }
 

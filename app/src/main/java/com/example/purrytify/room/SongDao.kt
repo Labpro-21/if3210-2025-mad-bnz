@@ -11,13 +11,13 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface SongDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertSong(song: Song)
+    suspend fun insertSong(song: Song): Long  // Return inserted row ID
 
     @Update
-    fun updateSong(song: Song)
+    suspend fun updateSong(song: Song): Int  // Return number of rows updated
 
     @Query("SELECT * FROM songs ORDER BY createdAt DESC")
-    fun getAllSongs(): Flow<List<Song>>
+    fun getAllSongs(): Flow<List<Song>>  // Flow is fine as-is
 
     @Query("SELECT * FROM songs WHERE isLiked = 1 ORDER BY createdAt DESC")
     fun getLikedSongs(): Flow<List<Song>>
@@ -29,8 +29,8 @@ interface SongDao {
     fun getNewSongs(): Flow<List<Song>>
 
     @Query("UPDATE songs SET lastPlayed = :timestamp WHERE id = :songId")
-    fun updateLastPlayed(songId: String, timestamp: Long)
+    suspend fun updateLastPlayed(songId: String, timestamp: Long): Int  // Return number of rows updated
 
     @Query("DELETE FROM songs WHERE id = :songId")
-    fun deleteSong(songId: String)
+    suspend fun deleteSong(songId: String): Int  // Return number of rows deleted
 }

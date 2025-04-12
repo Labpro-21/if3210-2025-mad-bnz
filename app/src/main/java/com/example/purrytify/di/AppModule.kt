@@ -1,5 +1,6 @@
 package com.example.purrytify.di
 
+import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import com.example.purrytify.auth.TokenManager
@@ -28,6 +29,10 @@ object AppModule {
         )
             .addMigrations(AppDatabase.MIGRATION_1_2)
             .build()
+    }
+    @Provides
+    fun provideContext(application: Application): Context {
+        return application.applicationContext
     }
 
     @Provides

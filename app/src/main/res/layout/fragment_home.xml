@@ -122,7 +122,6 @@
                 </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Recently Played -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -146,7 +145,7 @@
                 tools:itemCount="5"
                 tools:listitem="@layout/item_song_grid" />
 
-            <!-- New Releases -->
+            <!-- New Releases section - use item_song_horizontal with overflow -->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -163,15 +162,6 @@
                     android:textSize="22sp"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tv_see_all_new"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:padding="8dp"
-                    android:text="See all"
-                    android:textColor="@color/spotify_green" />
             </RelativeLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -182,38 +172,13 @@
                 android:orientation="horizontal"
                 android:paddingHorizontal="8dp"
                 android:paddingBottom="16dp"
+                android:overScrollMode="always"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:itemCount="5"
-                tools:listitem="@layout/item_song_horizontal" />
-
-            <!-- Made for You -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:text="Made for you"
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_recommended"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:paddingHorizontal="16dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="3"
                 tools:listitem="@layout/item_song" />
 
-            <include
-                android:id="@+id/mini_player"
-                layout="@layout/mini_player"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toTopOf="@+id/bottomNavigation" />
+
+
 
             <com.google.android.material.bottomnavigation.BottomNavigationView
                 android:id="@+id/bottomNavigation"
@@ -226,6 +191,12 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:menu="@menu/bottom_nav_menu" />
+<!--            <include-->
+<!--                android:id="@+id/mini_player"-->
+<!--                layout="@layout/mini_player"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:lay="17dp"  />-->
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
@@ -253,6 +224,5 @@
             android:textColor="@color/white"
             android:textSize="16sp" />
     </LinearLayout>
-
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

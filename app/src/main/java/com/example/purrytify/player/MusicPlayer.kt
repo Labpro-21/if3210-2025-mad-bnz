@@ -2,6 +2,8 @@ package com.example.purrytify.player
 
 import android.content.Context
 import android.media.MediaPlayer
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.purrytify.model.Song
@@ -9,7 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MusicPlayer @Inject constructor(context: Context) {
+class MusicPlayer @Inject constructor(private val context: Context) {
     private var mediaPlayer: MediaPlayer? = null
 
     private val _currentSong = MutableLiveData<Song?>(null)
@@ -28,18 +30,28 @@ class MusicPlayer @Inject constructor(context: Context) {
         _currentSong.value = song
         mediaPlayer?.release()
 
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(song.path)
-            setOnPreparedListener {
-                start()
-                _isPlaying.value = true
-                _songDuration.value = duration.toLong()
+        try {
+            mediaPlayer = MediaPlayer().apply {
+                setDataSource(context, Uri.parse(song.path))
+                setOnPreparedListener {
+                    start()
+                    _isPlaying.value = true
+                    _songDuration.value = duration.toLong()
+                }
+                setOnCompletionListener {
+                    _isPlaying.value = false
+                    // Auto play next song if available
+                }
+                setOnErrorListener { _, what, extra ->
+                    Log.e("MusicPlayer", "MediaPlayer error: $what, $extra")
+                    _isPlaying.value = false
+                    true
+                }
+                prepareAsync()
             }
-            setOnCompletionListener {
-                _isPlaying.value = false
-                // Auto play next song if available
-            }
-            prepareAsync()
+        } catch (e: Exception) {
+            Log.e("MusicPlayer", "Error setting up MediaPlayer", e)
+            _isPlaying.value = false
         }
     }
 

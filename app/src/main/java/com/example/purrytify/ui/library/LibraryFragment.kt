@@ -1,45 +1,47 @@
 package com.example.purrytify.ui.library
 
+import android.app.AlertDialog
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.SearchView
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import android.widget.PopupMenu
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.purrytify.R
 import com.example.purrytify.databinding.DialogAddSongBinding
 import com.example.purrytify.databinding.FragmentLibraryBinding
 import com.example.purrytify.model.Song
+import com.example.purrytify.ui.common.BaseFragment
 import com.example.purrytify.utils.FilePickerHelper
 import com.example.purrytify.utils.ImagePickerHelper
 import com.example.purrytify.utils.showToast
-import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.UUID
 
 @AndroidEntryPoint
-class LibraryFragment : Fragment() {
+class LibraryFragment : BaseFragment() {
     private var _binding: FragmentLibraryBinding? = null
     private val binding get() = _binding!!
+
     private val viewModel: LibraryViewModel by viewModels()
     private lateinit var songAdapter: SongAdapter
     private lateinit var filePickerHelper: FilePickerHelper
     private lateinit var imagePickerHelper: ImagePickerHelper
-    private var selectedAudioUri: Uri? = null
-    private var selectedImageUri: Uri? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-    }
+    private var selectedImageUri: android.net.Uri? = null
+    private var selectedAudioUri: android.net.Uri? = null
+    private var searchEditText: EditText? = null
+    private var emptyStateTextView: TextView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,12 +54,16 @@ class LibraryFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        searchEditText = view.findViewById(R.id.etSearch)
 
-        setupFilePickerHelper()
-        setupImagePickerHelper()
+
         setupAdapter()
         setupRecyclerView()
         setupTabs()
+        setupSearch()
+        setupSortButton()
+        setupFilePickerHelper()
+        setupImagePickerHelper()
         setupFabAddSong()
         observeViewModel()
     }
@@ -65,9 +71,9 @@ class LibraryFragment : Fragment() {
     private fun setupFilePickerHelper() {
         filePickerHelper = FilePickerHelper(this) { song ->
             viewModel.insertSong(song)
-            requireContext().showToast("Song imported successfully")
         }
     }
+
     private fun setupImagePickerHelper() {
         imagePickerHelper = ImagePickerHelper(this) { uri ->
             selectedImageUri = uri
@@ -77,30 +83,105 @@ class LibraryFragment : Fragment() {
     private fun setupAdapter() {
         songAdapter = SongAdapter(
             onItemClick = { song ->
-                viewModel.playSong(song)
+                findNavController().navigate(
+                    R.id.action_libraryFragment_to_playerFragment
+                )
             },
             onLikeClick = { song ->
                 viewModel.toggleLike(song)
-            }
+            },
+            onPlayClick = { song ->
+                musicPlayerManager.playSong(song)
+                viewModel.playSong(song)
+            },
+            musicPlayerManager = musicPlayerManager
         )
+        musicPlayerManager.currentSong.observe(viewLifecycleOwner) { _ ->
+            songAdapter.notifyDataSetChanged()
+        }
+
+        musicPlayerManager.isPlaying.observe(viewLifecycleOwner) { _ ->
+            songAdapter.notifyDataSetChanged()
+        }
     }
 
     private fun setupRecyclerView() {
         binding.rvSongs.apply {
-            layoutManager = LinearLayoutManager(requireContext())
+            layoutManager = LinearLayoutManager(context)
             adapter = songAdapter
         }
     }
 
     private fun setupTabs() {
-        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                viewModel.setTab(tab?.position ?: 0)
+        binding.tabLayout.addOnTabSelectedListener(object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
+                tab?.position?.let { viewModel.setTab(it) }
+            }
+            override fun onTabUnselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {}
+            override fun onTabReselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {}
+        })
+    }
+
+    private fun setupSearch() {
+        searchEditText?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                viewModel.search(s?.toString() ?: "")
             }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
+            override fun afterTextChanged(s: Editable?) {}
         })
+
+        view?.findViewById<View>(R.id.btnSearch)?.setOnClickListener {
+            val isSearchVisible = searchEditText?.visibility == View.VISIBLE
+            searchEditText?.visibility = if (isSearchVisible) View.GONE else View.VISIBLE
+
+            if (!isSearchVisible) {
+                searchEditText?.requestFocus()
+                val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                searchEditText?.let { editText ->
+                    imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+                }
+            } else {
+                searchEditText?.text?.clear()
+                viewModel.search("")
+            }
+        }
+    }
+
+    private fun setupSortButton() {
+        binding.btnSort.setOnClickListener {
+            val popup = PopupMenu(requireContext(), it)
+            popup.menu.add("Sort by Title")
+            popup.menu.add("Sort by Artist")
+            popup.menu.add("Sort by Date Added")
+            popup.menu.add("Sort by Recently Played")
+
+            popup.setOnMenuItemClickListener { menuItem ->
+                when (menuItem.title.toString()) {
+                    "Sort by Title" -> {
+                        viewModel.setSortOrder(LibraryViewModel.SortOrder.TITLE)
+                        true
+                    }
+                    "Sort by Artist" -> {
+                        viewModel.setSortOrder(LibraryViewModel.SortOrder.ARTIST)
+                        true
+                    }
+                    "Sort by Date Added" -> {
+                        viewModel.setSortOrder(LibraryViewModel.SortOrder.DATE_ADDED)
+                        true
+                    }
+                    "Sort by Recently Played" -> {
+                        viewModel.setSortOrder(LibraryViewModel.SortOrder.RECENTLY_PLAYED)
+                        true
+                    }
+                    else -> false
+                }
+            }
+
+            popup.show()
+        }
     }
 
     private fun setupFabAddSong() {
@@ -108,7 +189,6 @@ class LibraryFragment : Fragment() {
             showAddSongOptions()
         }
     }
-
     private fun showAddSongOptions() {
         val options = arrayOf("Import local file", "Add song manually")
         AlertDialog.Builder(requireContext())
@@ -121,7 +201,6 @@ class LibraryFragment : Fragment() {
             }
             .show()
     }
-
 
 
     private fun showAddSongDialog() {
@@ -217,42 +296,45 @@ class LibraryFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.songs.observe(viewLifecycleOwner) { songs ->
             songAdapter.submitList(songs)
-            updateEmptyState(songs)
+            updateEmptyState(songs.isEmpty())
         }
     }
 
-    private fun updateEmptyState(songs: List<Song>) {
-        if (songs.isEmpty()) {
-            binding.emptyStateLayout.visibility = View.VISIBLE
-            binding.rvSongs.visibility = View.GONE
+    private fun updateEmptyState(isEmpty: Boolean) {
+        if (emptyStateTextView != null) {
+            emptyStateTextView?.visibility = if (isEmpty) View.VISIBLE else View.GONE
         } else {
-            binding.emptyStateLayout.visibility = View.GONE
-            binding.rvSongs.visibility = View.VISIBLE
+            val textView = view?.findViewById<TextView>(R.id.tvEmptyState)
+            textView?.visibility = if (isEmpty) View.VISIBLE else View.GONE
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.library_menu, menu)
+    private fun showSongOptionsMenu(song: Song, view: View) {
+        val popupMenu = PopupMenu(requireContext(), view)
+        popupMenu.menu.add("Play")
+        popupMenu.menu.add("Delete")
 
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as SearchView
-
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return false
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.title) {
+                "Play" -> {
+                    viewModel.playSong(song)
+                    true
+                }
+                "Delete" -> {
+                    viewModel.deleteSong(song)
+                    true
+                }
+                else -> false
             }
+        }
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                viewModel.searchSongs(newText ?: "")
-                return true
-            }
-        })
-
-        super.onCreateOptionsMenu(menu, inflater)
+        popupMenu.show()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        searchEditText = null
+        emptyStateTextView = null
         _binding = null
     }
 }

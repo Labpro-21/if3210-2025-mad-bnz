@@ -10,6 +10,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.example.purrytify.R
 import com.example.purrytify.databinding.FragmentProfileBinding
 import com.example.purrytify.model.ApiResponse
 import com.example.purrytify.model.User
@@ -35,6 +38,7 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         observeViewModel()
         viewModel.loadProfile()
+        setupSettingsButton()
     }
 
     private fun observeViewModel() {
@@ -49,11 +53,31 @@ class ProfileFragment : Fragment() {
                 }
             }
         }
+        viewModel.totalSongs.observe(viewLifecycleOwner) { count ->
+            binding.tvTotalSongs.text = count.toString()
+        }
+
+        viewModel.likedSongs.observe(viewLifecycleOwner) { count ->
+            binding.tvLikedSongs.text = count.toString()
+        }
+
     }
     private fun showProfile(user: User) {
         binding.tvUsername.text = user.username
         binding.tvEmail.text = user.email
-        // Load profile photo with Glide
+        val profilePhotoUrl = if (user.profilePhoto.isNullOrEmpty()) {
+            null
+        } else {
+            "${viewModel.getBaseUrl()}/uploads/profile-picture/${user.profilePhoto}"
+        }
+
+        Glide.with(this)
+            .load(profilePhotoUrl)
+            .placeholder(R.drawable.profile_placeholder)
+            .error(R.drawable.profile_placeholder)
+            .circleCrop()
+            .into(binding.ivProfilePic)
+
     }
 
     private fun showLoading() {
@@ -63,6 +87,12 @@ class ProfileFragment : Fragment() {
     private fun showError(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
+    private fun setupSettingsButton() {
+        binding.btnSettings.setOnClickListener {
+            findNavController().navigate(R.id.action_profileFragment_to_settingsFragment)
+        }
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

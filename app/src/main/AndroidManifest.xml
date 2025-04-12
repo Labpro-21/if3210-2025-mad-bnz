@@ -41,10 +41,6 @@
             android:name=".ui.player.PlayerActivity"
             android:exported="false" />
 
-        <service
-            android:name=".player.PlayerService"
-            android:enabled="true"
-            android:exported="false" />
 
         <service
 

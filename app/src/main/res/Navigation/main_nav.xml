@@ -5,6 +5,13 @@
     android:id="@+id/main_nav"
     app:startDestination="@id/homeFragment">
 
+    <!-- Player Fragment -->
+    <fragment
+        android:id="@+id/playerFragment"
+        android:name="com.example.purrytify.ui.player.PlayerFragment"
+        android:label="Player"
+        tools:layout="@layout/fragment_player" />
+
     <!-- Home Fragment -->
     <fragment
         android:id="@+id/homeFragment"
@@ -14,6 +21,35 @@
         <action
             android:id="@+id/action_homeFragment_to_playerActivity"
             app:destination="@id/navigation_to_player" />
+        <action
+            android:id="@+id/action_homeFragment_to_playerFragment"
+            app:destination="@id/playerFragment" />
+    </fragment>
+
+    <!-- Profile Fragment -->
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.purrytify.ui.profile.ProfileFragment"
+        android:label="ProfileFragment"
+        tools:layout="@layout/fragment_profile">
+
+        <action
+            android:id="@+id/action_profileFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+
+    <!-- Settings Fragment -->
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.purrytify.ui.settings.SettingsFragment"
+        android:label="SettingsFragment"
+        tools:layout="@layout/fragment_settings">
+
+        <action
+            android:id="@+id/action_settingsFragment_to_loginActivity"
+            app:destination="@id/loginActivity"
+            app:popUpTo="@id/main_nav"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <!-- Library Fragment -->
@@ -25,23 +61,15 @@
         <action
             android:id="@+id/action_libraryFragment_to_playerActivity"
             app:destination="@id/navigation_to_player" />
+        <action
+            android:id="@+id/action_libraryFragment_to_playerFragment"
+            app:destination="@id/playerFragment" />
     </fragment>
 
-    <!-- Profile Fragment -->
-    <fragment
-        android:id="@+id/profileFragment"
-        android:name="com.example.purrytify.ui.profile.ProfileFragment"
-        android:label="Profile"
-        tools:layout="@layout/fragment_profile" />
-
-    <!-- Add this fragment to your main_nav.xml -->
-    <fragment
-        android:id="@+id/settingsFragment"
-        android:name="com.example.purrytify.ui.settings.SettingsFragment"
-        android:label="Settings"
-        tools:layout="@layout/fragment_settings" />
-
-    <!-- Actions to external activities -->
+    <activity
+        android:id="@+id/loginActivity"
+        android:name="com.example.purrytify.auth.LoginActivity"
+        android:label="LoginActivity" />
     <action
         android:id="@+id/navigation_to_player"
         app:destination="@id/player_activity" />
@@ -49,13 +77,9 @@
     <action
         android:id="@+id/navigation_to_login"
         app:destination="@id/login_activity" />
-    <!-- Add to your main_nav.xml -->
-
     <action
         android:id="@+id/action_settingsFragment_to_loginActivity"
         app:destination="@id/login_activity" />
-
-    <!-- Activity destinations (correctly defined) -->
     <activity
         android:id="@+id/player_activity"
         android:name="com.example.purrytify.ui.player.PlayerActivity" />

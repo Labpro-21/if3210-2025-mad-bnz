@@ -3,62 +3,79 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
-    android:paddingHorizontal="16dp"
-    android:paddingVertical="12dp">
+    android:layout_height="72dp"
+    android:background="?selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:paddingHorizontal="16dp">
 
     <ImageView
-        android:id="@+id/iv_album"
+        android:id="@+id/ivAlbum"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:src="@drawable/ic_placeholder_album" />
+        tools:src="@drawable/placeholder_album" />
 
     <TextView
-        android:id="@+id/tv_title"
+        android:id="@+id/tvTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/white"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@id/tv_artist"
-        app:layout_constraintEnd_toStartOf="@id/iv_like"
-        app:layout_constraintStart_toEndOf="@id/iv_album"
+        app:layout_constraintBottom_toTopOf="@id/tvArtist"
+        app:layout_constraintEnd_toStartOf="@id/btnPlayPause"
+        app:layout_constraintStart_toEndOf="@id/ivAlbum"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
         tools:text="Song Title" />
 
     <TextView
-        android:id="@+id/tv_artist"
+        android:id="@+id/tvArtist"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textColor="#B3FFFFFF"
+        android:textColor="#AAAAAA"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/iv_like"
-        app:layout_constraintStart_toEndOf="@id/iv_album"
-        app:layout_constraintTop_toBottomOf="@id/tv_title"
+        app:layout_constraintEnd_toStartOf="@id/btnPlayPause"
+        app:layout_constraintStart_toEndOf="@id/ivAlbum"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
         tools:text="Artist Name" />
 
+    <ImageButton
+        android:id="@+id/btnPlayPause"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="8dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:contentDescription="Play/Pause"
+        android:src="@drawable/ic_play"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/ivLike"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white" />
+
     <ImageView
-        android:id="@+id/iv_like"
+        android:id="@+id/ivLike"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:padding="2dp"
-        android:src="@drawable/ic_like"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?selectableItemBackgroundBorderless"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_like"
+        app:tint="@color/white" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

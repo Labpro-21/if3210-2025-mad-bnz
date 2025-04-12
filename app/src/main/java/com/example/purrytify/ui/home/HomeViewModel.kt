@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.purrytify.model.ApiResponse
 import com.example.purrytify.model.Song
 import com.example.purrytify.model.User
+import com.example.purrytify.player.MusicPlayer
 import com.example.purrytify.repository.SongRepository
 import com.example.purrytify.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val songRepository: SongRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val musicPlayer: MusicPlayer
 ) : ViewModel() {
 
     private val _userInfo = MutableLiveData<User?>()
@@ -37,7 +39,6 @@ class HomeViewModel @Inject constructor(
         loadUserInfo()
         loadRecentlyPlayedSongs()
         loadNewReleases()
-        loadRecommendedSongs()
     }
 
     private fun loadUserInfo() {
@@ -83,20 +84,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun loadRecommendedSongs() {
-        viewModelScope.launch {
-            try {
-
-                songRepository.getLikedSongs().collect { songs ->
-                    _recommendedSongs.value = songs
-                }
-            } catch (e: Exception) {
-                Log.e("HomeViewModel", "Error loading recommended songs", e)
-            }
-        }
-    }
 
     fun playSong(song: Song) {
+        musicPlayer.playSong(song)
         viewModelScope.launch {
             songRepository.updateLastPlayed(song.id, System.currentTimeMillis())
         }

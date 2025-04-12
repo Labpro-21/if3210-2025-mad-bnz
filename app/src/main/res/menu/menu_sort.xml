@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/sort_by_title"
+        android:title="Sort by Title" />
+    <item
+        android:id="@+id/sort_by_artist"
+        android:title="Sort by Artist" />
+    <item
+        android:id="@+id/sort_by_date_added"
+        android:title="Sort by Date Added" />
+    <item
+        android:id="@+id/sort_by_recently_played"
+        android:title="Sort by Recently Played" />
+</menu>
