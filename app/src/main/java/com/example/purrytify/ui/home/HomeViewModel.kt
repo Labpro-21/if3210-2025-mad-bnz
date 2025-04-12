@@ -74,7 +74,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
 
-                songRepository.getAllSongs().collect { songs ->
+                songRepository.getRecentlyAddedSongs().collect { songs ->
                     _newReleaseSongs.value = songs.sortedByDescending { it.id }
                         .take(10)
                 }

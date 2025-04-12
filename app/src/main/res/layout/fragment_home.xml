@@ -145,58 +145,50 @@
                 tools:itemCount="5"
                 tools:listitem="@layout/item_song_grid" />
 
-            <!-- New Releases section - use item_song_horizontal with overflow -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="8dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:text="New releases"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+
+
+            <androidx.core.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="303dp"
+                android:fillViewport="true"
+                android:overScrollMode="always">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_new_songs"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:text="New releases"
-                    android:textColor="@color/white"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:clipToPadding="false"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="8dp"
+                    android:paddingBottom="16dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:itemCount="5"
+                    tools:listitem="@layout/item_song" />
 
-            </RelativeLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_new_songs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:orientation="horizontal"
-                android:paddingHorizontal="8dp"
-                android:paddingBottom="16dp"
-                android:overScrollMode="always"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="5"
-                tools:listitem="@layout/item_song" />
+            </androidx.core.widget.NestedScrollView>
 
 
 
 
-            <com.google.android.material.bottomnavigation.BottomNavigationView
-                android:id="@+id/bottomNavigation"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bottom_nav_background"
-                app:itemIconTint="@color/bottom_nav_item_color"
-                app:itemTextColor="@color/bottom_nav_item_color"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:menu="@menu/bottom_nav_menu" />
-<!--            <include-->
-<!--                android:id="@+id/mini_player"-->
-<!--                layout="@layout/mini_player"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:lay="17dp"  />-->
+
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

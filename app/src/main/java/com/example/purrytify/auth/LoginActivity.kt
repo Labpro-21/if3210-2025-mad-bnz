@@ -21,11 +21,11 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        if (viewModel.isLoggedIn()) {
-            navigateToMain()
-            return
-        }
+//
+//        if (viewModel.isLoggedIn()) {
+//            navigateToMain()
+//            return
+//        }
 
         setupListeners()
         observeViewModel()
@@ -56,6 +56,8 @@ class LoginActivity : AppCompatActivity() {
             }
             is ApiResponse.Success -> {
                 binding.progressBar.visibility = View.GONE
+                val serviceIntent = Intent(this, TokenRefreshService::class.java)
+                startService(serviceIntent)
                 navigateToMain()
             }
             is ApiResponse.Error -> {

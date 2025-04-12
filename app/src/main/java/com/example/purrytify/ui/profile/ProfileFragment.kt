@@ -16,11 +16,12 @@ import com.example.purrytify.R
 import com.example.purrytify.databinding.FragmentProfileBinding
 import com.example.purrytify.model.ApiResponse
 import com.example.purrytify.model.User
+import com.example.purrytify.ui.common.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ProfileFragment : Fragment() {
+class ProfileFragment : BaseFragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     private val viewModel: ProfileViewModel by viewModels()
@@ -39,6 +40,15 @@ class ProfileFragment : Fragment() {
         observeViewModel()
         viewModel.loadProfile()
         setupSettingsButton()
+        loadData()
+    }
+    private fun loadData() {
+        checkNetworkBeforeLoading {
+            viewModel.loadProfile()
+        }
+    }
+    override fun onReconnected() {
+        viewModel.loadProfile()
     }
 
     private fun observeViewModel() {

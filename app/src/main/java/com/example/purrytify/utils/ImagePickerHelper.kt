@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -20,9 +21,14 @@ class ImagePickerHelper(
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
 
-                val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                fragment.requireContext().contentResolver.takePersistableUriPermission(uri, flags)
-
+                try {
+                    fragment.requireContext().contentResolver.takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                } catch (e: Exception) {
+                    Log.e("ImagePickerHelper", "Failed to get persistable permission", e)
+                }
                 onImageSelected(uri)
             }
         }
@@ -39,10 +45,19 @@ class ImagePickerHelper(
     }
 
     fun pickImage() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissionLauncher.launch(android.Manifest.permission.READ_MEDIA_IMAGES)
-        } else {
-            permissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+        try {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "image/*"
+                addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            imagePickerLauncher.launch(intent)
+        } catch (e: Exception) {
+            Log.e("ImagePickerHelper", "Error launching picker", e)
+            Toast.makeText(fragment.requireContext(),
+                "Could not open image picker: ${e.message}",
+                Toast.LENGTH_SHORT).show()
         }
     }
     fun setCallback(callback: (Uri) -> Unit) {

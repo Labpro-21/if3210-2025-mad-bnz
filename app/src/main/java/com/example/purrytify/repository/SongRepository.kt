@@ -51,4 +51,9 @@ class SongRepository @Inject constructor(
     fun getPlayedSongs(): Flow<List<Song>> {
         return songDao.getPlayedSongs()
     }
+    fun getRecentlyAddedSongs(): Flow<List<Song>> {
+        // Calculate timestamp for a day ago
+        val thirtyDaysAgo = System.currentTimeMillis() - (24 * 60 * 60 * 1000L) //open for modif
+        return songDao.getRecentlyAddedSongs(thirtyDaysAgo)
+    }
 }

@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"
+        android:minSdkVersion="33"/>
 
     <application
         android:name=".PurrytifyApp"
@@ -45,6 +47,11 @@
         <service
 
             android:name=".player.PlayerService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <service
+            android:name=".auth.TokenRefreshService"
             android:enabled="true"
             android:exported="false" />
     </application>

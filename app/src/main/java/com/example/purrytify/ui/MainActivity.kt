@@ -1,5 +1,10 @@
 package com.example.purrytify.ui
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,10 +21,15 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
 import com.example.purrytify.R
+import com.example.purrytify.auth.LoginActivity
+import com.example.purrytify.auth.TokenRefreshService
 import com.example.purrytify.databinding.ActivityMainBinding
 import com.example.purrytify.model.Song
+import com.example.purrytify.network.NetworkStatus
+import com.example.purrytify.network.NetworkStatusHelper
 import com.example.purrytify.player.MusicPlayerManager
 import com.example.purrytify.player.PlayerViewModel
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -32,7 +42,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     @Inject
     lateinit var musicPlayerManager: MusicPlayerManager
-
+    private lateinit var logoutReceiver: BroadcastReceiver
+    private lateinit var networkStatusHelper: NetworkStatusHelper
+    private lateinit var snackbar: Snackbar
+    private val viewModel: MainViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -89,9 +102,24 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Log.e("MainActivity", "Mini player views not found in layout")
             }
+
+            logoutReceiver = object : BroadcastReceiver() {
+                override fun onReceive(context: Context, intent: Intent) {
+                    if (intent.action == TokenRefreshService.ACTION_LOGOUT) {
+                        logoutUser()
+                    }
+                }
+            }
+            registerReceiver(
+                logoutReceiver,
+                IntentFilter(TokenRefreshService.ACTION_LOGOUT)
+            )
+            setupNetworkMonitoring()
         } catch (e: Exception) {
             Log.e("MainActivity", "Error in onCreate", e)
         }
+
+
     }
     private fun updateMiniPlayerUI(song: Song) {
         val songTitle = findViewById<TextView>(R.id.miniPlayerTitle)
@@ -119,11 +147,41 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    private fun updatePlayPauseButton(button: ImageView) {
-        musicPlayerManager.isPlaying.observe(this) { isPlaying ->
-            button.setImageResource(
-                if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
-            )
+    private fun logoutUser() {
+        viewModel.logout()
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
+    private fun setupNetworkMonitoring() {
+        networkStatusHelper = NetworkStatusHelper(this)
+
+        networkStatusHelper.networkStatus.observe(this) { status ->
+            when (status) {
+                is NetworkStatus.Available -> hideNetworkError()
+                is NetworkStatus.Unavailable -> showNetworkError()
+                is NetworkStatus.Error -> showNetworkError()
+            }
+        }
+        networkStatusHelper.register()
+    }
+
+    private fun showNetworkError() {
+        snackbar = Snackbar.make(
+            binding.root,
+            "No internet connection",
+            Snackbar.LENGTH_INDEFINITE
+        ).apply {
+            setBackgroundTint(getColor(R.color.colorError))
+            setTextColor(Color.WHITE)
+            show()
+        }
+    }
+
+    private fun hideNetworkError() {
+        if (::snackbar.isInitialized && snackbar.isShown) {
+            snackbar.dismiss()
         }
     }
 
@@ -132,5 +190,10 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
         binding.bottomNavigation.setupWithNavController(navController)
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(logoutReceiver)
+        networkStatusHelper.unregister()
     }
 }

@@ -63,7 +63,7 @@ class HomeFragment : BaseFragment() {
         }
 
         binding.rvNewSongs.apply {
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             adapter = newReleasesAdapter
         }
 

@@ -40,4 +40,7 @@ interface SongDao {
     @Query("SELECT * FROM songs WHERE lastPlayed > 0")
     fun getPlayedSongs(): Flow<List<Song>>
 
+    @Query("SELECT * FROM songs WHERE createdAt > :timestamp ORDER BY createdAt DESC LIMIT 10")
+    fun getRecentlyAddedSongs(timestamp: Long): Flow<List<Song>>
+
 }

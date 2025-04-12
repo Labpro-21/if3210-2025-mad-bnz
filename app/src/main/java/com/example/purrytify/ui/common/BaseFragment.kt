@@ -2,12 +2,14 @@ package com.example.purrytify.ui.common
 
 import android.os.Bundle
 import android.view.View
+import android.widget.ViewFlipper
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.purrytify.R
 import com.example.purrytify.databinding.MiniPlayerBinding
 import com.example.purrytify.player.MusicPlayerManager
+import com.example.purrytify.utils.NetworkUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,11 +22,51 @@ abstract class BaseFragment : Fragment() {
 
     private var miniPlayer: MiniPlayerBinding? = null
 
+    private var viewFlipper: ViewFlipper? = null
+    private var isNetworkErrorShown = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.post {
             setupMiniPlayer(view)
         }
+        viewFlipper = view.findViewById(R.id.viewFlipper)
+        NetworkUtils.observeNetworkStatus(requireContext()) { isConnected ->
+            if (isConnected) {
+                hideNetworkError()
+                if (isNetworkErrorShown) {
+                    onReconnected()
+                    isNetworkErrorShown = false
+                }
+            } else {
+                showNetworkError()
+                isNetworkErrorShown = true
+            }
+        }
+    }
+    protected fun checkNetworkBeforeLoading(onSuccess: () -> Unit) {
+        if (NetworkUtils.isNetworkAvailable(requireContext())) {
+            onSuccess()
+        } else {
+            showNetworkError()
+        }
+    }
+    private fun showNetworkError() {
+        viewFlipper?.apply {
+            if (childCount > 1 && displayedChild != 1) {
+                displayedChild = 1 // Show network error layout
+            }
+        }
+    }
+    private fun hideNetworkError() {
+        viewFlipper?.apply {
+            if (childCount > 0 && displayedChild != 0) {
+                displayedChild = 0 // Show content layout
+            }
+        }
+    }
+    open fun onReconnected() {
+        // Default implementation does nothing
     }
 
     private fun setupMiniPlayer(rootView: View) {

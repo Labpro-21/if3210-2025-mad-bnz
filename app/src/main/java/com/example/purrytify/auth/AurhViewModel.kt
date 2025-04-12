@@ -39,6 +39,7 @@ class AuthViewModel @Inject constructor(
                             tokenManager.saveRefreshToken(loginResponse.refreshToken)
                         }
                         _loginState.value = ApiResponse.Success(Unit)
+
                     } else {
                         _loginState.value = ApiResponse.Error("Server returned empty token")
                     }

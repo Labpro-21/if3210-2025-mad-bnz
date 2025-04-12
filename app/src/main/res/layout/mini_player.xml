@@ -14,9 +14,11 @@
 
     <ImageView
         android:id="@+id/miniPlayerCover"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
         android:scaleType="centerCrop"
         android:background="@drawable/round_corners"
         android:elevation="2dp"
