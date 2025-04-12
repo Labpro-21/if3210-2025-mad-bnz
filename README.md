@@ -37,13 +37,13 @@
 
 ## 🖼️ Screenshot Fitur Utama
 ### Autentikasi
-![Halaman Login](screenshot/login.png)  
+![Halaman Login](img/login.png)  
 *Login dengan NIM ITB dan validasi JWT*
 
 ### Navigasi Utama
-| Home | Library | Profile |
-|------|---------|---------|
-| ![Home](img/home.png) | ![Library](img/library.png) | ![Profile](img/profile.png) |
+| Home | Library | Profile                     |
+|------|---------|-----------------------------|
+| ![Home](img/home.png) | ![Library](img/library.png) | ![Profile](img/profile.jpg) |
 
 ### Fitur Pemutaran
 ![Player Full](img/now-playing.png)  
