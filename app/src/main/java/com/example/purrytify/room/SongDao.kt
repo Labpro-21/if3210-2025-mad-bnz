@@ -43,4 +43,15 @@ interface SongDao {
     @Query("SELECT * FROM songs WHERE createdAt > :timestamp ORDER BY createdAt DESC LIMIT 10")
     fun getRecentlyAddedSongs(timestamp: Long): Flow<List<Song>>
 
+    @Query("SELECT * FROM songs WHERE isLocal = 1 OR isDownloaded = 1")
+    fun getOfflineSongs(): Flow<List<Song>>
+
+    @Query("SELECT * FROM songs WHERE country = 'GLOBAL' AND (isLocal = 0 AND isDownloaded = 0)")
+    fun getGlobalTopSongs(): Flow<List<Song>>
+
+    @Query("SELECT * FROM songs WHERE country != 'GLOBAL' AND (isLocal = 0 AND isDownloaded = 0)")
+    fun getCountryTopSongs(): Flow<List<Song>>
+
+    @Query("SELECT * FROM songs WHERE isDownloaded = 1")
+    fun getDownloadedSongs(): Flow<List<Song>>
 }

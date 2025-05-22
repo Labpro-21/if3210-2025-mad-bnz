@@ -45,12 +45,6 @@
 
 
         <service
-
-            android:name=".player.PlayerService"
-            android:enabled="true"
-            android:exported="false" />
-
-        <service
             android:name=".auth.TokenRefreshService"
             android:enabled="true"
             android:exported="false" />

@@ -30,7 +30,7 @@
           <theme>@style/Theme.Purrytify</theme>
         </config>
       </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_edit_profile.xml">
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_charts.xml">
         <config>
           <theme>@style/Theme.Purrytify</theme>
         </config>
@@ -55,17 +55,22 @@
           <theme>@style/Theme.Purrytify</theme>
         </config>
       </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_search.xml">
-        <config>
-          <theme>@style/Theme.Purrytify</theme>
-        </config>
-      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_settings.xml">
         <config>
           <theme>@style/Theme.Purrytify</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_sound_capsule.xml">
+        <config>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_category.xml">
+        <config>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_chart_song.xml">
         <config>
           <theme>@style/Theme.Purrytify</theme>
         </config>
@@ -117,7 +122,6 @@
       </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/menu/menu_song_options.xml">
         <config>
-          <state>portrait</state>
           <theme>@style/Theme.Purrytify</theme>
         </config>
       </layout>
@@ -148,17 +152,242 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c0fa220f-a2be-4206-913a-211c310d52d6" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/repository/AnalyticsRepository.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/repository/OnlineSongRepository.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/room/AnalayticsDao.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/charts/ChartSongAdapter.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/charts/ChartsFragment.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/charts/ChartsViewModel.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/profile/SoundCapsuleFragment.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/anim/slide_in_left.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/anim/slide_in_right.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/anim/slide_out_left.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/anim/slide_out_right.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_chart_cover.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_downloaded.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_globe.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_more_vert.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_charts.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_chart_song.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/checksums/checksums.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/checksums/md5-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/checksums/md5-checksums.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/checksums/sha1-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/checksums/sha1-checksums.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/dependencies-accessors/a61340088b08ce93455d4dec80e778db54b5e746/metadata.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/dependencies-accessors/a61340088b08ce93455d4dec80e778db54b5e746/metadata.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/dependencies-accessors/a61340088b08ce93455d4dec80e778db54b5e746/sources/org/gradle/accessors/dm/LibrariesForLibs.java" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/dependencies-accessors/a61340088b08ce93455d4dec80e778db54b5e746/sources/org/gradle/accessors/dm/LibrariesForLibs.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/dependencies-accessors/a61340088b08ce93455d4dec80e778db54b5e746/sources/org/gradle/accessors/dm/LibrariesForLibsInPluginsBlock.java" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/dependencies-accessors/a61340088b08ce93455d4dec80e778db54b5e746/sources/org/gradle/accessors/dm/LibrariesForLibsInPluginsBlock.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/dependencies-accessors/e5d0c485ed9081f602aa0c935b664eb63f940590/metadata.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/dependencies-accessors/e5d0c485ed9081f602aa0c935b664eb63f940590/sources/org/gradle/accessors/dm/LibrariesForLibs.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/dependencies-accessors/e5d0c485ed9081f602aa0c935b664eb63f940590/sources/org/gradle/accessors/dm/LibrariesForLibsInPluginsBlock.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/dependencies-accessors/gc.properties" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/dependencies-accessors/gc.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileChanges/last-build.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileChanges/last-build.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/resourceHashesCache.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/gc.properties" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/gc.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/cache.properties" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/cache.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/config.properties" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/config.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/vcs-1/gc.properties" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/vcs-1/gc.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/assetWizardSettings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/assetWizardSettings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/kotlinc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/migrations.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/migrations.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/navEditor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/navEditor.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/app/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/proguard-rules.pro" beforeDir="false" afterPath="$PROJECT_DIR$/app/proguard-rules.pro" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/androidTest/java/com/example/purrytify/ExampleInstrumentedTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/androidTest/java/com/example/purrytify/ExampleInstrumentedTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/ic_purrytify_logo-playstore.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/ic_purrytify_logo-playstore.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/PurrytifyApp.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/PurrytifyApp.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/auth/AurhViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/auth/AurhViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/auth/AuthRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/auth/AuthRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/auth/LoginActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/auth/LoginActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/auth/TokenManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/auth/TokenManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/auth/TokenRefreshService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/auth/TokenRefreshService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/data/UserPreferencesRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/data/UserPreferencesRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/di/AppModule.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/di/AppModule.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/di/DataStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/di/DataStore.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/model/ApiResponse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/model/ApiResponse.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/model/Song.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/model/Song.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/model/User.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/model/User.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/network/ApiClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/network/ApiClient.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/network/ApiService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/network/ApiService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/network/NetworkStatus.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/network/NetworkStatus.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/player/MusicPlayer.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/player/MusicPlayerManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/player/MusicPlayerManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/player/PlayerBinder.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/player/PlayerService.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/player/PlayerViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/player/PlayerViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/repository/PreferenceRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/repository/PreferenceRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/repository/SongRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/repository/SongRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/repository/UserRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/repository/UserRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/room/AppDatabase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/room/AppDatabase.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/room/Converters.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/room/Converters.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/room/SongDao.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/room/SongDao.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/MainViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/MainViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/common/BaseFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/common/BaseFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/home/HomeFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/home/HomeFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/home/HomeViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/home/HomeViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/home/SongGridAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/home/SongGridAdapter.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/home/SongHorizontalAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/home/SongHorizontalAdapter.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/library/LibraryFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/library/LibraryFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/library/LibraryViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/library/LibraryViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/library/SongAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/library/SongAdapter.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/player/PlayerActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/player/PlayerActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/player/PlayerFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/player/PlayerFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/profile/ProfileFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/profile/ProfileFragment.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/profile/ProfileViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/profile/ProfileViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/settings/SettingsFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/settings/SettingsFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/settings/SettingsViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/ui/settings/SettingsViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/utils/Constants.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/utils/Constants.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/utils/DateFormatter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/utils/DateFormatter.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/utils/Extensions.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/utils/Extensions.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/utils/FilePickerHelper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/utils/FilePickerHelper.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/utils/ImagePickerHelper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/utils/ImagePickerHelper.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/utils/MediaHelper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/utils/MediaHelper.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/utils/NetworkUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/utils/NetworkUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/Navigation/main_nav.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/Navigation/main_nav.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/color/bottom_nav_item_color.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/color/bottom_nav_item_color.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/album_cover.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/album_cover.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/app_logo.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/app_logo.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/bottom_nav_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/bottom_nav_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/bottom_nav_colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/bottom_nav_colors.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/circle_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/circle_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/circle_background_green.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/circle_background_green.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/circle_green_bg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/circle_green_bg.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/dialog_gradient_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/dialog_gradient_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/gradient_background_dark.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/gradient_background_dark.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/gradient_overlay_bottom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/gradient_overlay_bottom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_add.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_add.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_audio.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_audio.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_back.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_back.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_camera.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_camera.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_chevron_right.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_chevron_right.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_close.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_close.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_down.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_down.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_edit.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_edit.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_home.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_home.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_image.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_image.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_launcher_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_launcher_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_launcher_foreground.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_launcher_foreground.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_library.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_library.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_like.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_like.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_liked.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_liked.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_location.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_location.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_music_library.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_music_library.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_music_note.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_music_note.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_no_internet.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_no_internet.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_pause.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_pause.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_person.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_person.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_placeholder_album.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_placeholder_album.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_play.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_play.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_profile.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_profile.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_repeat.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_repeat.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_repeat_all.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_repeat_all.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_repeat_one.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_repeat_one.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_search.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_search.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_shuffle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_shuffle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_shuffle_on.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_shuffle_on.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_skip_next.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_skip_next.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_skip_previous.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_skip_previous.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_sort.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_sort.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/login_gradient_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/login_gradient_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/mini_player_gradient.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/mini_player_gradient.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/placeholder_album.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/placeholder_album.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/profile_gradient_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/profile_gradient_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/profile_placeholder.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/profile_placeholder.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/round_corners.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/round_corners.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/rounded_button_bg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/rounded_button_bg.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/search_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/search_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/tab_selector_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/tab_selector_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_login.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_login.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_player.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_player.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/dialog_add_song.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/dialog_add_song.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_home.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_home.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_library.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_library.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_player.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_player.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_profile.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_profile.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_category.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_category.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_song.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_song.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_song_grid.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_song_grid.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_song_horizontal.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_song_horizontal.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/layout_no_internet.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/layout_no_internet.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/mini_player.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/mini_player.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/view_flipper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/view_flipper.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/bottom_nav_menu.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/bottom_nav_menu.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/library_menu.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/library_menu.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/main_menu.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/main_menu.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/menu_song_options.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/menu_song_options.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/menu_sort.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/menu_sort.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/settings_menu.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/settings_menu.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_purrytify_logo.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_purrytify_logo.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_purrytify_logo_round.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_purrytify_logo_round.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_logo.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_logo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_purrytify_logo.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_purrytify_logo.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_purrytify_logo_foreground.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_purrytify_logo_foreground.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_purrytify_logo_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_purrytify_logo_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_launcher.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_logo.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_logo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_purrytify_logo.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_purrytify_logo.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_purrytify_logo_foreground.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_purrytify_logo_foreground.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_purrytify_logo_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_purrytify_logo_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_logo.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_logo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_purrytify_logo.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_purrytify_logo.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_purrytify_logo_foreground.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_purrytify_logo_foreground.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_purrytify_logo_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_purrytify_logo_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_logo.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_logo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_purrytify_logo.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_purrytify_logo.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_purrytify_logo_foreground.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_purrytify_logo_foreground.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_purrytify_logo_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_purrytify_logo_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_logo.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_logo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_purrytify_logo.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_purrytify_logo.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_purrytify_logo_foreground.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_purrytify_logo_foreground.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_purrytify_logo_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_purrytify_logo_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/ic_purrytify_logo_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/ic_purrytify_logo_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/styles.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/styles.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/themes.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/themes.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/xml/backup_rules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/xml/backup_rules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/xml/data_extraction_rules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/xml/data_extraction_rules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/xml/network_security_config.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/xml/network_security_config.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/test/java/com/example/purrytify/ExampleUnitTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/test/java/com/example/purrytify/ExampleUnitTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/local.properties" beforeDir="false" afterPath="$PROJECT_DIR$/local.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -216,6 +445,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="valueResourceFile" />
+        <option value="Class" />
         <option value="layoutResourceFile" />
         <option value="resourceFile" />
         <option value="Kotlin Class" />
@@ -248,29 +478,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;com.google.services.firebase.aqiPopupShown&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/ekaaprawira/Documents/github/SEMVII/MAD/Purrytify/app/src/main/res&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Build Variants&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.17&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;AndroidSdkUpdater&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Android App.app.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "com.google.services.firebase.aqiPopupShown": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/ekaaprawira/Documents/github/SEMVII/MAD/Purrytify",
+    "project.structure.last.edited": "Build Variants",
+    "project.structure.proportion": "0.17",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "AndroidSdkUpdater"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;kotlin-gradle-user-dirs&quot;: [
-      &quot;/Users/ekaaprawira/.gradle&quot;
+  "keyToStringList": {
+    "kotlin-gradle-user-dirs": [
+      "/Users/ekaaprawira/.gradle"
     ]
   }
-}</component>
+}]]></component>
   <component name="PsdUISettings">
     <option name="LAST_EDITED_BUILD_TYPE" value="release" />
   </component>
@@ -282,10 +512,14 @@
       <recent name="$PROJECT_DIR$/app/src/main/res/layout" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app/src/main/java/com/example/purrytify/model" />
       <recent name="$PROJECT_DIR$/app/src/main/res/drawable" />
       <recent name="$PROJECT_DIR$/app/src/main/res/menu" />
       <recent name="$PROJECT_DIR$/app/src/main/res/Navigation" />
       <recent name="$PROJECT_DIR$/app/src/main/res/values" />
+    </key>
+    <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="com.example.purrytify.room" />
     </key>
   </component>
   <component name="RunManager">

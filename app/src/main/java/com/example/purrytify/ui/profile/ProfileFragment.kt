@@ -87,6 +87,9 @@ class ProfileFragment : BaseFragment() {
         binding.btnSettings.setOnClickListener {
             findNavController().navigate(R.id.action_profileFragment_to_settingsFragment)
         }
+        binding.cardSoundCapsule.setOnClickListener {
+            findNavController().navigate(R.id.action_profileFragment_to_soundCapsuleFragment)
+        }
     }
     private fun checkNetworkBeforeImageSelection() {
         if (!NetworkUtils.isNetworkAvailable(requireContext())) {

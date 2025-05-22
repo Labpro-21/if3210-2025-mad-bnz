@@ -14,6 +14,7 @@ import com.example.purrytify.auth.TokenManager
 import com.example.purrytify.model.ApiResponse
 import com.example.purrytify.model.User
 import com.example.purrytify.network.ApiService
+import com.example.purrytify.player.MusicPlayerManager
 import com.example.purrytify.repository.SongRepository
 import com.example.purrytify.repository.UserRepository
 import com.example.purrytify.utils.Constants
@@ -34,6 +35,7 @@ class ProfileViewModel @Inject constructor(
     private val songRepository: SongRepository,
     private val authRepository: AuthRepository,
     private val apiService: ApiService,
+    private val musicPlayerManager: MusicPlayerManager,
     private val tokenManager: TokenManager
 ) : ViewModel() {
 
@@ -51,6 +53,11 @@ class ProfileViewModel @Inject constructor(
 
     private val _uploadProgress = MutableLiveData<ApiResponse<String>?>(null)
     val uploadProgress: LiveData<ApiResponse<String>?> = _uploadProgress
+
+    val currentSong = musicPlayerManager.currentSong
+    val isPlaying = musicPlayerManager.isPlaying
+    val currentPosition = musicPlayerManager.currentPosition
+
 
     fun loadProfile() {
         _profile.value = ApiResponse.Loading

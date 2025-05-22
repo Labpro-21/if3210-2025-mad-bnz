@@ -8,8 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.purrytify.model.ApiResponse
 import com.example.purrytify.model.Song
 import com.example.purrytify.model.User
-import com.example.purrytify.player.MusicPlayer
+import com.example.purrytify.player.MusicPlayerManager
 import com.example.purrytify.repository.SongRepository
+import com.example.purrytify.repository.OnlineSongRepository
 import com.example.purrytify.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
@@ -20,7 +21,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val songRepository: SongRepository,
     private val userRepository: UserRepository,
-    private val musicPlayer: MusicPlayer
+    private val onlineSongRepository: OnlineSongRepository,
+    private val musicPlayerManager: MusicPlayerManager
 ) : ViewModel() {
 
     private val _userInfo = MutableLiveData<User?>()
@@ -34,6 +36,9 @@ class HomeViewModel @Inject constructor(
 
     private val _recommendedSongs = MutableLiveData<List<Song>>()
     val recommendedSongs: LiveData<List<Song>> = _recommendedSongs
+
+    private val _globalTopSongs = MutableLiveData<List<Song>>()
+    private val _countryTopSongs = MutableLiveData<List<Song>>()
 
     init {
         loadUserInfo()
@@ -86,9 +91,18 @@ class HomeViewModel @Inject constructor(
 
 
     fun playSong(song: Song) {
-        musicPlayer.playSong(song)
+        musicPlayerManager.playSong(song)
         viewModelScope.launch {
             songRepository.updateLastPlayed(song.id, System.currentTimeMillis())
+        }
+    }
+
+    fun loadTopSongs() {
+        viewModelScope.launch {
+            onlineSongRepository.getGlobalTopSongs()
+                .collect { songs ->
+                    _globalTopSongs.value = songs
+                }
         }
     }
 

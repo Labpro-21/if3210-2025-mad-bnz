@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.purrytify.model.Song
-import com.example.purrytify.player.MusicPlayer
+import com.example.purrytify.player.MusicPlayerManager
 import com.example.purrytify.repository.SongRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +18,6 @@ import javax.inject.Inject
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     private val songRepository: SongRepository,
-    private val musicPlayer: MusicPlayer
 ) : ViewModel() {
     enum class SortOrder {
         TITLE, ARTIST, DATE_ADDED, RECENTLY_PLAYED
@@ -41,7 +40,7 @@ class LibraryViewModel @Inject constructor(
 
     private fun loadSongs() {
         viewModelScope.launch {
-            songRepository.getAllSongs().collectLatest { songList ->
+            songRepository.getOfflineSongs().collectLatest { songList ->
                 _songs.value = applySortAndFilter(songList)
             }
         }
@@ -51,13 +50,16 @@ class LibraryViewModel @Inject constructor(
         _currentTab.value = tabIndex
         viewModelScope.launch {
             when (tabIndex) {
-                0 -> songRepository.getAllSongs().collectLatest { songs ->
+                0 -> songRepository.getOfflineSongs().collectLatest { songs ->
                     _songs.value = applySortAndFilter(songs)
                 }
                 1 -> songRepository.getLikedSongs().collectLatest { songs ->
                     _songs.value = applySortAndFilter(songs)
                 }
-                else -> songRepository.getAllSongs().collectLatest { songs ->
+                2 -> songRepository.getDownloadedSongs().collectLatest { songs ->
+                _songs.value = applySortAndFilter(songs)
+                }
+                else -> songRepository.getOfflineSongs().collectLatest { songs ->
                     _songs.value = applySortAndFilter(songs)
                 }
             }
@@ -68,13 +70,17 @@ class LibraryViewModel @Inject constructor(
         _searchQuery.value = query
         viewModelScope.launch {
             when (_currentTab.value) {
-                0 -> songRepository.getAllSongs().collectLatest { songs ->
+                0 -> songRepository.getOfflineSongs().collectLatest { songs ->
                     _songs.value = applySortAndFilter(songs)
                 }
                 1 -> songRepository.getLikedSongs().collectLatest { songs ->
                     _songs.value = applySortAndFilter(songs)
                 }
-                else -> songRepository.getAllSongs().collectLatest { songs ->
+
+                2 -> songRepository.getDownloadedSongs().collectLatest { songs ->
+                    _songs.value = applySortAndFilter(songs)
+                }
+                else -> songRepository.getOfflineSongs().collectLatest { songs ->
                     _songs.value = applySortAndFilter(songs)
                 }
             }
@@ -105,12 +111,6 @@ class LibraryViewModel @Inject constructor(
         _songs.value = applySortAndFilter(_songs.value ?: emptyList())
     }
 
-    fun playSong(song: Song) {
-        musicPlayer.playSong(song)
-        viewModelScope.launch {
-            songRepository.updateLastPlayed(song.id, System.currentTimeMillis())
-        }
-    }
 
     fun toggleLike(song: Song) {
         viewModelScope.launch {

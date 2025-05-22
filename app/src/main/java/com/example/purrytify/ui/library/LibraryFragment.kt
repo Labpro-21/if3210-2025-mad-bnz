@@ -82,20 +82,21 @@ class LibraryFragment : BaseFragment() {
 
     private fun setupAdapter() {
         songAdapter = SongAdapter(
-            onItemClick = { song ->
+            onNavigateToPlayer = { song ->
                 findNavController().navigate(
-                    R.id.action_libraryFragment_to_playerFragment
+                    R.id.action_libraryFragment_to_playerFragment,
+                    Bundle().apply {
+                        putSerializable("song", song)
+                    }
                 )
             },
             onLikeClick = { song ->
                 viewModel.toggleLike(song)
             },
-            onPlayClick = { song ->
-                musicPlayerManager.playSong(song)
-                viewModel.playSong(song)
-            },
             musicPlayerManager = musicPlayerManager
         )
+
+        // Keep these observers
         musicPlayerManager.currentSong.observe(viewLifecycleOwner) { _ ->
             songAdapter.notifyDataSetChanged()
         }
@@ -309,27 +310,27 @@ class LibraryFragment : BaseFragment() {
         }
     }
 
-    private fun showSongOptionsMenu(song: Song, view: View) {
-        val popupMenu = PopupMenu(requireContext(), view)
-        popupMenu.menu.add("Play")
-        popupMenu.menu.add("Delete")
-
-        popupMenu.setOnMenuItemClickListener { item ->
-            when (item.title) {
-                "Play" -> {
-                    viewModel.playSong(song)
-                    true
-                }
-                "Delete" -> {
-                    viewModel.deleteSong(song)
-                    true
-                }
-                else -> false
-            }
-        }
-
-        popupMenu.show()
-    }
+//    private fun showSongOptionsMenu(song: Song, view: View) {
+//        val popupMenu = PopupMenu(requireContext(), view)
+//        popupMenu.menu.add("Play")
+//        popupMenu.menu.add("Delete")
+//
+//        popupMenu.setOnMenuItemClickListener { item ->
+//            when (item.title) {
+//                "Play" -> {
+////                    viewModel.playSong(song)
+//                    true
+//                }
+//                "Delete" -> {
+//                    viewModel.deleteSong(song)
+//                    true
+//                }
+//                else -> false
+//            }
+//        }
+//
+//        popupMenu.show()
+//    }
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -72,55 +72,102 @@
             android:orientation="vertical">
 
             <!-- Welcome card -->
-            <com.google.android.material.card.MaterialCardView
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                app:cardBackgroundColor="#333333"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="8dp">
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="16dp">
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:text="Charts"
+                    android:textColor="@color/white"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        android:layout_toStartOf="@id/iv_welcome"
-                        android:orientation="vertical">
+            </RelativeLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_global_charts"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    app:cardBackgroundColor="@color/teal_700"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="16dp">
 
                         <TextView
-                            android:id="@+id/tv_greeting"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Have a Good One"
+                            android:text="Top 50\nGlobal"
                             android:textColor="@color/white"
-                            android:textSize="24sp"
-                            android:textStyle="bold" />
+                            android:textSize="20sp"
+                            android:textStyle="bold"/>
+
+                        <ImageView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentBottom="true"
+                            android:src="@drawable/ic_globe"/>
+                    </RelativeLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_country_charts"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    app:cardBackgroundColor="#333333"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="16dp">
 
                         <TextView
-                            android:id="@+id/tv_username"
+                            android:id="@+id/tv_country_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:textColor="#CCFFFFFF"
-                            android:textSize="16sp"
-                            tools:text="John Doe" />
-                    </LinearLayout>
+                            android:text="Top 10\nCountry"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold"/>
 
-                    <ImageView
-                        android:id="@+id/iv_welcome"
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_music_note" />
-                </RelativeLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        <ImageView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentBottom="true"
+                            android:src="@drawable/ic_location"/>
+                    </RelativeLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+
+
 
             <TextView
                 android:layout_width="match_parent"

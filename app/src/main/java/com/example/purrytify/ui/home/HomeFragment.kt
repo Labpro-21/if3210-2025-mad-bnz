@@ -12,6 +12,7 @@ import com.example.purrytify.R
 import com.example.purrytify.databinding.FragmentHomeBinding
 import com.example.purrytify.model.Song
 import com.example.purrytify.ui.HomeViewModel
+import com.example.purrytify.ui.charts.ChartsFragment
 import com.example.purrytify.ui.common.BaseFragment
 import com.example.purrytify.ui.library.SongAdapter
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,20 +38,38 @@ class HomeFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.cardGlobalCharts.setOnClickListener {
+            val bundle = Bundle().apply {
+                putString("chartType", "global")
+            }
+            findNavController().navigate(
+                R.id.action_homeFragment_to_chartsFragment,
+                bundle
+            )
+        }
+
+        // For country charts
+        binding.cardCountryCharts.setOnClickListener {
+            val bundle = Bundle().apply {
+                putString("chartType", "country")
+            }
+            findNavController().navigate(
+                R.id.action_homeFragment_to_chartsFragment,
+                bundle
+            )
+        }
+
         setupAdapters()
         observeViewModel()
     }
 
     private fun setupAdapters() {
         newReleasesAdapter = SongAdapter(
-            onItemClick = { song ->
+            onNavigateToPlayer = { song ->
                 navigateToPlayer(song)
             },
             onLikeClick = { song ->
                 viewModel.toggleLike(song)
-            },
-            onPlayClick = { song ->
-                playSong(song)
             },
             musicPlayerManager = musicPlayerManager
         )
@@ -66,9 +85,7 @@ class HomeFragment : BaseFragment() {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             adapter = newReleasesAdapter
         }
-        binding.tvUsername.setText(
-            "Hi Assistant!"
-        )
+
         binding.ivProfile.setImageResource(R.drawable.ic_person)
 
 
@@ -102,8 +119,15 @@ class HomeFragment : BaseFragment() {
         )
     }
 
+
+//    private fun navigateToPlayerChart(song: Song) {
+//        findNavController().navigate(
+//            R.id.action_home_to_charts
+//        )
+//    }
+
     private fun playSong(song: Song) {
-        musicPlayerManager.playSong(song)
+//        musicPlayerManager.playSong(song)
         viewModel.playSong(song)
     }
 

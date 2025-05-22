@@ -33,8 +33,10 @@ class LoginActivity : AppCompatActivity() {
 
     private fun setupListeners() {
         binding.btnLogin.setOnClickListener {
-            val email = binding.etEmail.text.toString().trim()
-            val password = binding.etPassword.text.toString().trim()
+//            val email = binding.etEmail.text.toString().trim()
+//            val password = binding.etPassword.text.toString().trim()
+            val email = "13522001@std.stei.itb.ac.id"
+            val password = "13522001"
 
             if (email.isEmpty() || password.isEmpty()) {
                 showToast("Email and password must be filled")

@@ -16,9 +16,8 @@ import com.example.purrytify.model.Song
 import com.example.purrytify.player.MusicPlayerManager
 
 class SongAdapter(
-    private val onItemClick: (Song) -> Unit,
+    private val onNavigateToPlayer: (Song) -> Unit,
     private val onLikeClick: (Song) -> Unit,
-    private val onPlayClick: (Song) -> Unit,
     private val musicPlayerManager: MusicPlayerManager
 ) : ListAdapter<Song, SongAdapter.SongViewHolder>(DIFF_CALLBACK) {
 
@@ -33,12 +32,12 @@ class SongAdapter(
         RecyclerView.ViewHolder(binding.root) {
             
         init {
-            binding.root.setOnClickListener {
-                val position = bindingAdapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    onItemClick(getItem(position))
-                }
-            }
+//            binding.root.setOnClickListener {
+//                val position = bindingAdapterPosition
+//                if (position != RecyclerView.NO_POSITION) {
+//                    onItemClick(getItem(position))
+//                }
+//            }
             
             binding.ivLike.setOnClickListener {
                 val position = bindingAdapterPosition
@@ -54,7 +53,7 @@ class SongAdapter(
                     if (musicPlayerManager.currentSong.value?.id == song.id) {
                         musicPlayerManager.togglePlayPause()
                     } else {
-                        onPlayClick(song)
+                        musicPlayerManager.playSong(song)
                     }
                 }
             }
@@ -100,16 +99,8 @@ class SongAdapter(
         holder.bind(song)
 
         holder.itemView.setOnClickListener {
-            musicPlayerManager.playSong(song)
-            try {
-                val navController = holder.itemView.findNavController()
-                val bundle = Bundle().apply {
-                    putSerializable("song", song)
-                }
-                navController.navigate(R.id.playerFragment, bundle)
-            } catch (e: Exception) {
-                Log.e("SongAdapter", "Navigation failed", e)
-            }
+            musicPlayerManager.playSong(song) // Play song directly
+            onNavigateToPlayer(song) // Navigate to player
         }
     }
 }

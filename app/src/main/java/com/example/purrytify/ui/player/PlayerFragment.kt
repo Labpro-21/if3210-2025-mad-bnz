@@ -17,7 +17,9 @@ import com.example.purrytify.model.Song
 import com.example.purrytify.player.MusicPlayerManager
 import com.example.purrytify.player.PlayerViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,6 +32,7 @@ class PlayerFragment : Fragment() {
     lateinit var musicPlayerManager: MusicPlayerManager
     private var isSeekBarTracking = false
     private val playerViewModel: PlayerViewModel by viewModels()
+    private var timeUpdateJob: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -164,7 +167,7 @@ class PlayerFragment : Fragment() {
         playerViewModel.currentPosition.observe(viewLifecycleOwner) { position ->
             if (!binding.seekBar.isPressed) {
                 binding.seekBar.progress = position.toInt()
-                binding.tvCurrentTime.text = formatDuration(position)
+                binding.tvCurrentTime.text = formatDuration(position.toLong())
             }
         }
     }
@@ -176,16 +179,24 @@ class PlayerFragment : Fragment() {
     }
 
     private fun setupSeekBar() {
-        lifecycleScope.launch {
-            while (true) {
-                if (playerViewModel.isPlaying.value == true && !binding.seekBar.isPressed) {
-                    val currentPosition = playerViewModel.getCurrentPosition()
-                    binding.seekBar.progress = currentPosition
-                    binding.tvCurrentTime.text = formatDuration(currentPosition.toLong())
+        binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    binding.tvCurrentTime.text = formatDuration((progress * 1000).toLong())
                 }
-                delay(1000)
             }
-        }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                isSeekBarTracking = true
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                seekBar?.let {
+                    musicPlayerManager.seekTo(it.progress * 1000) // Convert seconds to milliseconds
+                }
+                isSeekBarTracking = false
+            }
+        })
     }
 
     private fun formatDuration(duration: Long): String {
@@ -212,9 +223,16 @@ class PlayerFragment : Fragment() {
             )
         }
 
+        musicPlayerManager.currentPosition.observe(viewLifecycleOwner) { position ->
+            if (!isSeekBarTracking) {  // Use a class-level variable instead of isPressed
+                binding.tvCurrentTime.text = formatDuration(position.toLong())
+                binding.seekBar.progress = position / 1000 // Convert milliseconds to seconds for SeekBar
+            }
+        }
+
         musicPlayerManager.songDuration.observe(viewLifecycleOwner) { duration ->
-            binding.tvTotalTime.text = formatTime(duration)
-            binding.seekBar.max = duration
+            binding.tvTotalTime.text = formatDuration(duration)
+            binding.seekBar.max = (duration / 1000).toInt() // Convert milliseconds to seconds
         }
 
         musicPlayerManager.isShuffleEnabled.observe(viewLifecycleOwner) { isShuffleEnabled ->
@@ -247,28 +265,42 @@ class PlayerFragment : Fragment() {
             updateLikeButtonState(isLiked)
         }
     }
-    private fun startTimeUpdate() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            while (true) {
-                if (!isSeekBarTracking) {
-                    val position = musicPlayerManager.getCurrentPosition()
-                    binding.tvCurrentTime.text = formatTime(position)
-                    binding.seekBar.progress = position
-                }
-                delay(1000)
-            }
-        }
-    }
 
     private fun formatTime(millis: Int): String {
         val minutes = millis / 60000
         val seconds = (millis % 60000) / 1000
-        return String.format("%d:%02d", minutes, seconds)
+        return String.format("%02d:%02d", minutes, seconds)
+    }
+
+    private fun startTimeUpdate() {
+        timeUpdateJob?.cancel() // Cancel any existing job
+        timeUpdateJob = viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                while (true) {
+                    if (!isSeekBarTracking && isActive) {
+                        val position = musicPlayerManager.getCurrentPosition()
+                        binding.tvCurrentTime.text = formatTime(position)
+                        binding.seekBar.progress = position / 1000 // Convert to seconds
+                    }
+                    delay(1000)
+                }
+            } catch (e: Exception) {
+                // Handle any errors
+                e.printStackTrace()
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        timeUpdateJob?.cancel() // Cancel the job when fragment is paused
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        timeUpdateJob?.cancel() // Clean up the coroutine
         _binding = null
+        super.onDestroyView()
     }
+
 
 }

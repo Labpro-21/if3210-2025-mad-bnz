@@ -1,35 +1,44 @@
 package com.example.purrytify.player
 
 import android.content.Context
+import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import android.media.AudioAttributes
 import com.example.purrytify.model.Song
+import com.example.purrytify.repository.OnlineSongRepository
 import com.example.purrytify.repository.SongRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class MusicPlayerManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val songRepository: SongRepository
-//    private val context: Context
+    private val songRepository: SongRepository,
+    private val onlineSongRepository: OnlineSongRepository,
+    private val analyticsRepository: AnalyticsRepository
 ) {
     private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var mediaPlayer: MediaPlayer? = null
     private var isInitialized = false
     private var positionUpdateJob: Job? = null
+    private val BUFFER_SIZE = 512 * 1024
+    private var isPreparing = false
 
     private val _currentSong = MutableLiveData<Song?>()
     val currentSong: LiveData<Song?> = _currentSong
@@ -40,14 +49,22 @@ class MusicPlayerManager @Inject constructor(
     private val _currentPosition = MutableLiveData<Int>(0)
     val currentPosition: LiveData<Int> = _currentPosition
 
-    private val _songDuration = MutableLiveData<Int>(0)
-    val songDuration: LiveData<Int> = _songDuration
+    private val _songDuration = MutableLiveData<Long>(0)
+    val songDuration: LiveData<Long> = _songDuration
 
     private val _playlist = mutableListOf<Song>()
     private var currentIndex = -1
 
-    private val _currentPlaylist = MutableLiveData<List<Song>>(emptyList())
+    private val _currentPlaylist = MutableLiveData<List<Song>>()
     val currentPlaylist: LiveData<List<Song>> = _currentPlaylist
+
+    private enum class PlaylistSource {
+        OFFLINE,
+        GLOBAL_TOP,
+        COUNTRY_TOP
+    }
+
+    private var currentPlaylistSource = PlaylistSource.OFFLINE
 
     private val _isShuffleEnabled = MutableLiveData<Boolean>(false)
     val isShuffleEnabled: LiveData<Boolean> = _isShuffleEnabled
@@ -55,12 +72,40 @@ class MusicPlayerManager @Inject constructor(
     private val _repeatMode = MutableLiveData<RepeatMode>(RepeatMode.OFF)
     val repeatMode: LiveData<RepeatMode> = _repeatMode
 
-    private val originalPlaylist = mutableListOf<Song>()
+    private var shuffledPlaylist: List<Song> = emptyList()
+    private var originalPlaylist: List<Song> = emptyList()
+
+    private val _isLoading = MutableLiveData<Boolean>(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    private var cachedPlaylist: List<Song> = emptyList()
 
     enum class RepeatMode {
         OFF, REPEAT_ALL, REPEAT_ONE
     }
 
+    private var errorRetryCount = 0
+    private val MAX_RETRY_ATTEMPTS = 3
+
+    init {
+        // Load initial state from local storage
+        viewModelScope.launch {
+            loadInitialState()
+        }
+    }
+    private suspend fun loadInitialState() {
+        try {
+            // Load online songs if available
+            onlineSongRepository.getGlobalTopSongs().collect { songs ->
+                songRepository.addOrUpdateOnlineSongs(songs)
+            }
+            onlineSongRepository.getCountryTopSongs("ID").collect { songs ->
+                songRepository.addOrUpdateOnlineSongs(songs)
+            }
+        } catch (e: Exception) {
+            Log.e("MusicPlayerManager", "Error loading online songs", e)
+        }
+    }
 
     fun initialize() {
         if (!isInitialized) {
@@ -70,54 +115,148 @@ class MusicPlayerManager @Inject constructor(
     }
 
     fun playSong(song: Song) {
-        val currentlyPlaying = _currentSong.value
-        if (currentlyPlaying?.id == song.id && mediaPlayer?.isPlaying == true) {
-            _isPlaying.postValue(true)
-            return
-        }
-        _currentSong.postValue(song)
+        viewModelScope.launch {
+            try {
+                _isLoading.postValue(true)
+                releaseMediaPlayer()
+                _currentPosition.postValue(0)
+                stopPositionUpdates()
 
-        val songIndex = _playlist.indexOfFirst { it.id == song.id }
-        currentIndex = if (songIndex != -1) songIndex else {
-            _playlist.add(song)
-            _playlist.size - 1
-        }
-        _currentPlaylist.postValue(_playlist.toList())
-        try {
-            releaseMediaPlayer()
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(context, Uri.parse(song.path))
-                prepareAsync()
 
-                setOnPreparedListener {
-                    start()
-                    _isPlaying.postValue(true)
-                    _songDuration.postValue(duration)
-                    startPositionUpdates()
-                    Log.d("MusicPlayerManager", "Now playing: ${song.title} - ${song.artist}")
+                // Update playlist source
+                currentPlaylistSource = when {
+                    song.isLocal || song.isDownloaded -> PlaylistSource.OFFLINE
+                    song.country == "GLOBAL" -> PlaylistSource.GLOBAL_TOP
+                    else -> PlaylistSource.COUNTRY_TOP
                 }
+                updateCurrentPlaylist()
 
-                setOnCompletionListener {
-                    _isPlaying.postValue(false)
-                    playNextSong()
-                }
+                _currentSong.postValue(song)
+                isPreparing = true
 
-                setOnErrorListener { _, what, extra ->
-                    Log.e("MusicPlayerManager", "MediaPlayer error: $what, $extra")
-                    _isPlaying.postValue(false)
-                    true
+                mediaPlayer = MediaPlayer().apply {
+                    try {
+                        setOnBufferingUpdateListener { _, percent ->
+                            if (percent < 100) {
+                                _isLoading.postValue(true)
+                            } else {
+                                _isLoading.postValue(false)
+                            }
+                        }
+                        setAudioAttributes(
+                            AudioAttributes.Builder()
+                                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                .setUsage(AudioAttributes.USAGE_MEDIA)
+                                .build()
+                        )
+
+                        setOnErrorListener { _, what, extra ->
+                            Log.e("MusicPlayerManager", "MediaPlayer error: $what, $extra for path: ${song.path}")
+                            isPreparing = false
+                            _isPlaying.postValue(false)
+                            releaseMediaPlayer()
+                            true
+                        }
+
+                        if (song.isLocal || song.isDownloaded) {
+                            Log.e("Song path offline",song.path)
+                            setDataSource(context, Uri.parse(song.path))
+                        } else {
+                            Log.e("Song path online",song.path)
+                            setDataSource(song.path)
+                        }
+
+                        setOnPreparedListener {
+                            errorRetryCount = 0
+                            isPreparing = false
+                            start()
+                            _isPlaying.postValue(true)
+                            _songDuration.postValue(duration.toLong())
+                            startPositionUpdates()
+
+                            if (song.isLocal || song.isDownloaded) {
+                                viewModelScope.launch {
+                                    songRepository.updateLastPlayed(song.id, System.currentTimeMillis())
+                                }
+                            }
+                        }
+
+                        setOnCompletionListener {
+                            _isPlaying.postValue(false)
+                            stopPositionUpdates()
+                            playNextSong()
+                        }
+
+                        prepareAsync()
+                    } catch (e: Exception) {
+                        Log.e("MusicPlayerManager", "Error setting up MediaPlayer for path: ${song.path}", e)
+                        releaseMediaPlayer()
+                        throw e
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e("MusicPlayerManager", "Error playing song: ${song.title}", e)
+                isPreparing = false
+                _isPlaying.postValue(false)
+                _currentPosition.postValue(0)
+                stopPositionUpdates()
+            } finally {
+                _isLoading.postValue(false)
             }
-        } catch (e: Exception) {
-            Log.e("MusicPlayerManager", "Error playing song", e)
-            _isPlaying.postValue(false)
         }
     }
 
+    private suspend fun updateCurrentPlaylist() {
+        try {
+            val songs = when (currentPlaylistSource) {
+                PlaylistSource.OFFLINE -> songRepository.getOfflineSongs()
+                PlaylistSource.GLOBAL_TOP -> songRepository.getGlobalTopSongs()
+                PlaylistSource.COUNTRY_TOP -> songRepository.getCountryTopSongs()
+            }.first()
+
+            Log.d("MusicPlayerManager", "Updating playlist - Source: $currentPlaylistSource, Size: ${songs.size}")
+
+            if (songs.isNotEmpty()) {
+                cachedPlaylist = songs
+                _currentPlaylist.postValue(songs)
+            } else {
+                // If new playlist is empty but we have cached songs, keep using cached
+                if (cachedPlaylist.isNotEmpty()) {
+                    Log.d("MusicPlayerManager", "Using cached playlist - Size: ${cachedPlaylist.size}")
+                    _currentPlaylist.postValue(cachedPlaylist)
+                } else {
+                    Log.e("MusicPlayerManager", "Both current and cached playlists are empty")
+                    _currentPlaylist.postValue(emptyList())
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("MusicPlayerManager", "Error updating playlist: ${e.message}")
+            if (cachedPlaylist.isNotEmpty()) {
+                Log.d("MusicPlayerManager", "Error occurred, using cached playlist")
+                _currentPlaylist.postValue(cachedPlaylist)
+            } else {
+                _currentPlaylist.postValue(emptyList())
+            }
+        }
+    }
+
+//    fun toggleShuffle() {
+//        val newValue = !(_isShuffleEnabled.value ?: false)
+//        _isShuffleEnabled.postValue(newValue)
+//        Log.d("MusicPlayerManager", "Shuffle ${if (newValue) "enabled" else "disabled"}")
+//    }
+
     fun toggleShuffle() {
-        val newValue = !(_isShuffleEnabled.value ?: false)
-        _isShuffleEnabled.postValue(newValue)
-        Log.d("MusicPlayerManager", "Shuffle ${if (newValue) "enabled" else "disabled"}")
+        val newShuffleState = !(_isShuffleEnabled.value ?: false)
+        _isShuffleEnabled.postValue(newShuffleState)
+
+        if (newShuffleState) {
+            originalPlaylist = _currentPlaylist.value ?: emptyList()
+            shuffledPlaylist = originalPlaylist.shuffled()
+        } else {
+            shuffledPlaylist = emptyList()
+            _currentPlaylist.postValue(originalPlaylist)
+        }
     }
 
     fun toggleRepeat() {
@@ -131,94 +270,132 @@ class MusicPlayerManager @Inject constructor(
         Log.d("MusicPlayerManager", "Repeat mode changed to: $nextMode")
     }
 
+//    fun playNextSong() {
+//        viewModelScope.launch {
+//            val currentSong = _currentSong.value ?: return@launch
+//
+//            if (_repeatMode.value == RepeatMode.REPEAT_ONE) {
+//                mediaPlayer?.seekTo(0)
+//                mediaPlayer?.start()
+//                _isPlaying.postValue(true)
+//                return@launch
+//            }
+//
+//            try {
+//                val playlist = _currentPlaylist.value ?: return@launch
+//                if (playlist.isEmpty()) return@launch
+//
+//                val currentIndex = playlist.indexOfFirst { it.id == currentSong.id }
+//                val nextSong = when {
+//                    _isShuffleEnabled.value == true -> {
+//                        playlist.filter { it.id != currentSong.id }.randomOrNull()
+//                    }
+//                    currentIndex < playlist.size - 1 -> playlist[currentIndex + 1]
+//                    _repeatMode.value == RepeatMode.REPEAT_ALL -> playlist.firstOrNull()
+//                    else -> null
+//                }
+//
+//                nextSong?.let { playSong(it) }
+//            } catch (e: Exception) {
+//                Log.e("MusicPlayerManager", "Error playing next song", e)
+//            }
+//        }
+//    }
+//
 
     fun playNextSong() {
-        viewModelScope.launch {
-            val currentSong = _currentSong.value ?: return@launch
-            if (_repeatMode.value == RepeatMode.REPEAT_ONE) {
-                mediaPlayer?.seekTo(0)
-                mediaPlayer?.start()
-                _isPlaying.postValue(true)
-                return@launch
-            }
+        val currentSong = _currentSong.value ?: return
+        val playlist = if (_isShuffleEnabled.value == true) shuffledPlaylist else _currentPlaylist.value
+        val currentIndex = playlist?.indexOf(currentSong) ?: -1
 
-            try {
-                val allSongs = songRepository.getAllSongs().first()
-
-                if (allSongs.isEmpty()) {
-                    Log.d("MusicPlayerManager", "No songs available in repository")
-                    return@launch
+        if (currentIndex != -1 && playlist != null) {
+            when (_repeatMode.value) {
+                RepeatMode.REPEAT_ONE -> {
+                    playSong(currentSong)
                 }
-                val currentIndex = allSongs.indexOfFirst { it.id == currentSong.id }
-                val nextSong = when {
-                    _isShuffleEnabled.value == true -> {
-                        val availableSongs = if (allSongs.size > 1) {
-                            allSongs.filter { it.id != currentSong.id }
-                        } else {
-                            allSongs
-                        }
-                        availableSongs.random()
+                RepeatMode.REPEAT_ALL -> {
+                    val nextIndex = (currentIndex + 1) % playlist.size
+                    playSong(playlist[nextIndex])
+                }
+                RepeatMode.OFF -> {
+                    if (currentIndex < playlist.size - 1) {
+                        playSong(playlist[currentIndex + 1])
                     }
-                    currentIndex < allSongs.size - 1 -> allSongs[currentIndex + 1]
-                    _repeatMode.value == RepeatMode.REPEAT_ALL -> allSongs.firstOrNull()
-                    else -> null
                 }
-                nextSong?.let {
-                    playSong(it)
-                    Log.d("MusicPlayerManager", "Playing next song: ${it.title}")
+                else -> {
+                    if (currentIndex < playlist.size - 1) {
+                        playSong(playlist[currentIndex + 1])
+                    }
                 }
-            } catch (e: Exception) {
-                Log.e("MusicPlayerManager", "Error playing next song", e)
             }
         }
     }
 
+
+//    fun playPreviousSong() {
+//        viewModelScope.launch {
+//            val currentSong = _currentSong.value ?: return@launch
+//
+//            if (getCurrentPosition() > 3000) {
+//                mediaPlayer?.seekTo(0)
+//                return@launch
+//            }
+//
+//            try {
+//                val playlist = _currentPlaylist.value ?: return@launch
+//                if (playlist.isEmpty()) return@launch
+//
+//                val currentIndex = playlist.indexOfFirst { it.id == currentSong.id }
+//                val previousSong = when {
+//                    _isShuffleEnabled.value == true -> {
+//                        val availableSongs = if (playlist.size > 1) {
+//                            playlist.filter { it.id != currentSong.id }
+//                        } else {
+//                            playlist
+//                        }
+//                        availableSongs.random()
+//                    }
+//                    currentIndex > 0 -> playlist[currentIndex - 1]
+//                    _repeatMode.value == RepeatMode.REPEAT_ALL -> playlist.lastOrNull()
+//                    else -> null
+//                }
+//
+//                previousSong?.let {
+//                    playSong(it)
+//                }
+//            } catch (e: Exception) {
+//                Log.e("MusicPlayerManager", "Error playing previous song", e)
+//            }
+//        }
+//    }
 
     fun playPreviousSong() {
-        viewModelScope.launch {
-            val currentSong = _currentSong.value ?: return@launch
-            if (getCurrentPosition() > 3000) {
-                mediaPlayer?.seekTo(0)
-                return@launch
-            }
-            if (_repeatMode.value == RepeatMode.REPEAT_ONE) {
-                mediaPlayer?.seekTo(0)
-                mediaPlayer?.start()
-                _isPlaying.postValue(true)
-                return@launch
-            }
+        val currentSong = _currentSong.value ?: return
+        val playlist = if (_isShuffleEnabled.value == true) shuffledPlaylist else _currentPlaylist.value
+        val currentIndex = playlist?.indexOf(currentSong) ?: -1
 
-            try {
-                val allSongs = songRepository.getAllSongs().first()
-
-                if (allSongs.isEmpty()) {
-                    Log.d("MusicPlayerManager", "No songs available in repository")
-                    return@launch
+        if (currentIndex != -1 && playlist != null) {
+            when (_repeatMode.value) {
+                RepeatMode.REPEAT_ONE -> {
+                    playSong(currentSong)
                 }
-                val currentIndex = allSongs.indexOfFirst { it.id == currentSong.id }
-                val previousSong = when {
-                    _isShuffleEnabled.value == true -> {
-                        val availableSongs = if (allSongs.size > 1) {
-                            allSongs.filter { it.id != currentSong.id }
-                        } else {
-                            allSongs
-                        }
-                        availableSongs.random()
+                RepeatMode.REPEAT_ALL -> {
+                    val previousIndex = if (currentIndex > 0) currentIndex - 1 else playlist.size - 1
+                    playSong(playlist[previousIndex])
+                }
+                RepeatMode.OFF -> {
+                    if (currentIndex > 0) {
+                        playSong(playlist[currentIndex - 1])
                     }
-                    currentIndex > 0 -> allSongs[currentIndex - 1]
-                    _repeatMode.value == RepeatMode.REPEAT_ALL -> allSongs.lastOrNull()
-                    else -> null
                 }
-                previousSong?.let {
-                    playSong(it)
-                    Log.d("MusicPlayerManager", "Playing previous song: ${it.title}")
+                else -> {
+                    if (currentIndex > 0) {
+                        playSong(playlist[currentIndex - 1])
+                    }
                 }
-            } catch (e: Exception) {
-                Log.e("MusicPlayerManager", "Error playing previous song", e)
             }
         }
     }
-
 
     fun togglePlayPause() {
         mediaPlayer?.let { player ->
@@ -233,21 +410,45 @@ class MusicPlayerManager @Inject constructor(
     }
 
     fun seekTo(position: Int) {
-        mediaPlayer?.seekTo(position)
-        _currentPosition.postValue(position)
+        try {
+            mediaPlayer?.let { player ->
+                if (!isPreparing) {
+                    player.seekTo(position)
+                    _currentPosition.postValue(position)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("MusicPlayerManager", "Error seeking to position", e)
+        }
     }
 
     private fun startPositionUpdates() {
         positionUpdateJob?.cancel()
-        positionUpdateJob = CoroutineScope(Dispatchers.Main).launch {
-            while (isActive && mediaPlayer != null) {
+        positionUpdateJob = viewModelScope.launch {
+            var lastUpdateTime = System.currentTimeMillis()
+            while (isActive) {
                 try {
-                    mediaPlayer?.let {
-                        if (it.isPlaying) {
-                            _currentPosition.postValue(it.currentPosition)
+                    mediaPlayer?.let { player ->
+                        if (player.isPlaying) {
+                            val currentTime = System.currentTimeMillis()
+                            val playedDuration = currentTime - lastUpdateTime
+
+                            // Update analytics every second
+                            if (playedDuration >= 1000) {
+                                _currentSong.value?.let { song ->
+                                    analyticsRepository.logPlayback(
+                                        songId = song.id,
+                                        duration = playedDuration,
+                                        userId = getCurrentUserId()
+                                    )
+                                }
+                                lastUpdateTime = currentTime
+                            }
+
+                            _currentPosition.postValue(player.currentPosition)
                         }
                     }
-                    delay(1000)
+                    delay(100)
                 } catch (e: Exception) {
                     Log.e("MusicPlayerManager", "Error updating position", e)
                 }
@@ -261,26 +462,57 @@ class MusicPlayerManager @Inject constructor(
     }
 
     private fun releaseMediaPlayer() {
-        stopPositionUpdates()
-        mediaPlayer?.apply {
-            if (isPlaying) {
-                stop()
+        try {
+            mediaPlayer?.apply {
+                if (isPlaying) {
+                    stop()
+                }
+                reset()
+                release()
+
             }
-            release()
+            mediaPlayer = null
+            _isPlaying.postValue(false)
+            stopPositionUpdates()
+
+        } catch (e: Exception) {
+            Log.e("MusicPlayerManager", "Error releasing media player", e)
         }
-        mediaPlayer = null
+    }
+
+    fun cleanup() {
+        stopPositionUpdates()
+    }
+
+
+    fun release() {
+        viewModelScope.cancel()
+        stopPositionUpdates()
+        releaseMediaPlayer()
     }
 
     fun getCurrentPosition(): Int {
-        return mediaPlayer?.currentPosition ?: 0
+        return try {
+            mediaPlayer?.currentPosition ?: 0
+        } catch (e: IllegalStateException) {
+            Log.e("MusicPlayerManager", "Error getting current position", e)
+            0
+        }
     }
 
     fun getDuration(): Int {
-        return mediaPlayer?.duration ?: 0
+        return try {
+            mediaPlayer?.duration ?: 0
+        } catch (e: IllegalStateException) {
+            Log.e("MusicPlayerManager", "Error getting duration", e)
+            0
+        }
     }
+//    override fun onCleared() {
+//        super.onCleared()
+//        releaseMediaPlayer()
+//        viewModelScope.cancel()
+//    }
 
-    fun release() {
-        releaseMediaPlayer()
-        isInitialized = false
-    }
+
 }

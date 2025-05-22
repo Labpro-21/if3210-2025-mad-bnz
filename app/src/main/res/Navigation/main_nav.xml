@@ -24,6 +24,18 @@
         <action
             android:id="@+id/action_homeFragment_to_playerFragment"
             app:destination="@id/playerFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_chartsFragment"
+            app:destination="@id/chartsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right">
+            <argument
+                android:name="chartType"
+                app:argType="string"
+                android:defaultValue="global" />
+        </action>
     </fragment>
 
     <!-- Profile Fragment -->
@@ -37,6 +49,7 @@
             android:id="@+id/action_profileFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
     </fragment>
+
 
     <!-- Settings Fragment -->
     <fragment
@@ -65,6 +78,16 @@
             android:id="@+id/action_libraryFragment_to_playerFragment"
             app:destination="@id/playerFragment" />
     </fragment>
+<!--Chart Fragment-->
+    <fragment
+        android:id="@+id/chartsFragment"
+        android:name="com.example.purrytify.ui.charts.ChartsFragment"
+        android:label="ChartsFragment">
+        <argument
+            android:name="chartType"
+            app:argType="string" />
+    </fragment>
+
 
     <activity
         android:id="@+id/loginActivity"

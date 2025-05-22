@@ -1,5 +1,6 @@
 package com.example.purrytify.network
 
+import com.example.purrytify.model.SongResponse
 import com.example.purrytify.model.UpdatePhotoResponse
 import com.example.purrytify.model.User
 import okhttp3.MultipartBody
@@ -10,8 +11,15 @@ import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Path
 
 interface ApiService {
+    @GET("api/top-songs/global")
+    suspend fun getGlobalTopSongs(): Response<List<SongResponse>>
+    
+    @GET("api/top-songs/{country_code}")
+    suspend fun getCountryTopSongs(@Path("country_code") countryCode: String): Response<List<SongResponse>>
+
     @POST("api/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 

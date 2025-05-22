@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background_dark">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_back"
+                android:tint="@color/white"/>
+
+        </androidx.appcompat.widget.Toolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Chart Header -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/iv_chart_cover"
+                    android:layout_width="160dp"
+                    android:layout_height="160dp"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                    android:id="@+id/tv_chart_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Top 50"
+                    android:textColor="@color/white"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/iv_chart_cover"
+                    app:layout_constraintTop_toTopOf="@id/iv_chart_cover"/>
+
+                <TextView
+                    android:id="@+id/tv_chart_subtitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="GLOBAL"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="@id/tv_chart_title"
+                    app:layout_constraintStart_toStartOf="@id/tv_chart_title"
+                    app:layout_constraintTop_toBottomOf="@id/tv_chart_title"/>
+
+                <TextView
+                    android:id="@+id/tv_chart_description"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Your daily update of the most played tracks right now"
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="@id/tv_chart_title"
+                    app:layout_constraintStart_toStartOf="@id/tv_chart_title"
+                    app:layout_constraintTop_toBottomOf="@id/tv_chart_subtitle"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Songs List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_songs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:paddingBottom="80dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="50"
+                tools:listitem="@layout/item_chart_song"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+    <ProgressBar
+        android:id="@+id/chart_loading_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

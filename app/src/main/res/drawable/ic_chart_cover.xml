@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:endColor="#1DB954"
+                android:startColor="#191414" />
+        </shape>
+    </item>
+    <item
+        android:width="120dp"
+        android:height="120dp"
+        android:gravity="center">
+        <vector
+            android:width="120dp"
+            android:height="120dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+            <path
+                android:fillColor="#FFFFFF"
+                android:pathData="M7,3H17V21H7V3M9,5V19H15V5H9M11,7H13V9H11V7M11,11H13V13H11V11M11,15H13V17H11V15Z"/>
+        </vector>
+    </item>
+</layer-list>

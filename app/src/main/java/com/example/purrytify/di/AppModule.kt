@@ -6,9 +6,11 @@ import androidx.room.Room
 import com.example.purrytify.auth.TokenManager
 import com.example.purrytify.network.ApiClient
 import com.example.purrytify.network.ApiService
-import com.example.purrytify.player.MusicPlayer
+import com.example.purrytify.player.MusicPlayerManager
 import com.example.purrytify.room.AppDatabase
 import com.example.purrytify.room.SongDao
+import com.example.purrytify.repository.OnlineSongRepository
+import com.example.purrytify.repository.SongRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,9 +29,14 @@ object AppModule {
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
         )
-            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .addMigrations(
+                AppDatabase.MIGRATION_1_2,
+                AppDatabase.MIGRATION_2_3,
+                AppDatabase.MIGRATION_3_4,
+            )
             .build()
     }
+
     @Provides
     fun provideContext(application: Application): Context {
         return application.applicationContext
@@ -45,9 +52,25 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideMusicPlayer(@ApplicationContext context: Context): MusicPlayer = MusicPlayer(context)
+    fun provideMusicPlayerManager(
+        @ApplicationContext context: Context,
+        songRepository: SongRepository,
+        onlineSongRepository: OnlineSongRepository
+    ): MusicPlayerManager {
+        return MusicPlayerManager(context, songRepository, onlineSongRepository)
+    }
 
     @Provides
     @Singleton
     fun provideTokenManager(@ApplicationContext context: Context): TokenManager = TokenManager(context)
+
+    @Provides
+    @Singleton
+    fun provideOnlineSongRepository(
+        apiService: ApiService,
+        @ApplicationContext context: Context,
+        songRepository: SongRepository
+    ): OnlineSongRepository {
+        return OnlineSongRepository(apiService, context, songRepository)
+    }
 }

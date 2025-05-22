@@ -15,20 +15,18 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
-    private val musicPlayer: MusicPlayer,
+    private val musicPlayerManager: MusicPlayerManager,
     private val songRepository: SongRepository
 ) : ViewModel() {
 
     private val _currentSong = MutableLiveData<Song?>()
-    val currentSong: LiveData<Song?> = _currentSong
-
-
-
-    val isPlaying = musicPlayer.isPlaying
-    val currentPosition = musicPlayer.currentPosition
 
     private val _likedSongs = MutableLiveData<List<Song>>(emptyList())
     val likedSongs: LiveData<List<Song>> = _likedSongs
+
+    val currentSong = musicPlayerManager.currentSong
+    val isPlaying = musicPlayerManager.isPlaying
+    val currentPosition = musicPlayerManager.currentPosition
 
     init {
         viewModelScope.launch {
@@ -39,7 +37,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun togglePlayPause() {
-        musicPlayer.togglePlayPause()
+        musicPlayerManager.togglePlayPause()
     }
 
     fun toggleLike(song: Song) {
@@ -70,12 +68,11 @@ class PlayerViewModel @Inject constructor(
 
 
     fun getCurrentPosition(): Int {
-        return musicPlayer.getCurrentPosition()
+        return musicPlayerManager.getCurrentPosition()
     }
 
     override fun onCleared() {
         super.onCleared()
-
-        musicPlayer.stop()
+        musicPlayerManager.cleanup()
     }
 }

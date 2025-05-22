@@ -110,9 +110,11 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+
             registerReceiver(
                 logoutReceiver,
-                IntentFilter(TokenRefreshService.ACTION_LOGOUT)
+                IntentFilter(TokenRefreshService.ACTION_LOGOUT),
+                Context.RECEIVER_EXPORTED // Add this flag
             )
             setupNetworkMonitoring()
         } catch (e: Exception) {
@@ -122,29 +124,37 @@ class MainActivity : AppCompatActivity() {
 
     }
     private fun updateMiniPlayerUI(song: Song) {
-        val songTitle = findViewById<TextView>(R.id.miniPlayerTitle)
-        val artistName = findViewById<TextView>(R.id.miniPlayerArtist)
-        val coverImage = findViewById<ImageView>(R.id.miniPlayerCover)
-        val progressBar = findViewById<ProgressBar>(R.id.miniPlayerProgress)
+        try {
+            val songTitle = findViewById<TextView>(R.id.miniPlayerTitle)
+            val artistName = findViewById<TextView>(R.id.miniPlayerArtist)
+            val coverImage = findViewById<ImageView>(R.id.miniPlayerCover)
+            val progressBar = findViewById<ProgressBar>(R.id.miniPlayerProgress)
 
-        songTitle.text = song.title
-        artistName.text = song.artist
-        Glide.with(this)
-            .load(song.coverUrl)
-            .placeholder(R.drawable.ic_placeholder_album)
-            .into(coverImage)
+            songTitle.text = song.title
+            artistName.text = song.artist
+            Glide.with(this)
+                .load(song.coverUrl)
+                .placeholder(R.drawable.ic_placeholder_album)
+                .into(coverImage)
 
-        lifecycleScope.launch {
-            while (true) {
-                if (musicPlayerManager.isPlaying.value == true) {
-                    val position = musicPlayerManager.getCurrentPosition()
-                    val duration = musicPlayerManager.getDuration()
-                    if (duration > 0) {
-                        progressBar.progress = (position * 100 / duration)
+            lifecycleScope.launch {
+                while (true) {
+                    try {
+                        if (musicPlayerManager.isPlaying.value == true) {
+                            val position = musicPlayerManager.getCurrentPosition()
+                            val duration = musicPlayerManager.getDuration()
+                            if (duration > 0) {
+                                progressBar.progress = (position * 100 / duration)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("MainActivity", "Error updating progress", e)
                     }
+                    delay(1000)
                 }
-                delay(1000)
             }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error updating mini player UI", e)
         }
     }
     private fun logoutUser() {
@@ -193,6 +203,7 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onDestroy() {
         super.onDestroy()
+        musicPlayerManager.cleanup()
         unregisterReceiver(logoutReceiver)
         networkStatusHelper.unregister()
     }
