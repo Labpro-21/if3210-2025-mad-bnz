@@ -111,4 +111,15 @@ dependencies {
 
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
     implementation("androidx.datastore:datastore-preferences-rxjava3:1.0.0")
+
+    // MPAndroidChart for the graph
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // Location services
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("com.google.android.libraries.places:places:3.3.0")
+
+    // DateTime
+
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
 }

@@ -49,8 +49,8 @@ interface SongDao {
     @Query("SELECT * FROM songs WHERE country = 'GLOBAL' AND (isLocal = 0 AND isDownloaded = 0)")
     fun getGlobalTopSongs(): Flow<List<Song>>
 
-    @Query("SELECT * FROM songs WHERE country != 'GLOBAL' AND (isLocal = 0 AND isDownloaded = 0)")
-    fun getCountryTopSongs(): Flow<List<Song>>
+    @Query("SELECT * FROM songs WHERE country = :countryCode AND (isLocal = 0 AND isDownloaded = 0) LIMIT 10")
+    fun getCountryTopSongs(countryCode: String): Flow<List<Song>>
 
     @Query("SELECT * FROM songs WHERE isDownloaded = 1")
     fun getDownloadedSongs(): Flow<List<Song>>

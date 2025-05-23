@@ -18,6 +18,39 @@ class TokenManager @Inject constructor(@ApplicationContext context: Context) {
     companion object {
         private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
         private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
+        private val USER_ID_KEY = stringPreferencesKey("user_id")
+        private val USER_COUNTRY_KEY = stringPreferencesKey("user_country")
+    }
+
+    private object PreferencesKeys {
+        val USER_ID = stringPreferencesKey("user_id")
+        val USER_COUNTRY = stringPreferencesKey("user_country")
+    }
+    fun saveUserInfo(userId: String, countryCode: String) = runBlocking {
+        dataStore.edit { preferences ->
+            preferences[USER_ID_KEY] = userId
+            preferences[USER_COUNTRY_KEY] = countryCode
+        }
+    }
+    fun clearAll() = runBlocking {
+        dataStore.edit { preferences ->
+            preferences.clear()
+        }
+    }
+
+    fun getUserId(): String? = runBlocking {
+        dataStore.data.first()[USER_ID_KEY]
+    }
+
+    fun getUserCountry(): String? = runBlocking {
+        dataStore.data.first()[USER_COUNTRY_KEY]
+    }
+
+    fun clearUserInfo() = runBlocking {
+        dataStore.edit { preferences ->
+            preferences.remove(USER_ID_KEY)
+            preferences.remove(USER_COUNTRY_KEY)
+        }
     }
 
     fun saveAccessToken(token: String) = runBlocking {

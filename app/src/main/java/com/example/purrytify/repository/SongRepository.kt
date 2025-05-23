@@ -38,7 +38,7 @@ class SongRepository @Inject constructor(
     fun getGlobalTopSongs(): Flow<List<Song>> = songDao.getGlobalTopSongs()
 
 
-    fun getCountryTopSongs(): Flow<List<Song>> = songDao.getCountryTopSongs()
+    fun getCountryTopSongs(): Flow<List<Song>> = songDao.getCountryTopSongs(tokenManager.getUserCountry().toString())
     fun getDownloadedSongs(): Flow<List<Song>> = songDao.getDownloadedSongs()
 
     suspend fun addOrUpdateOnlineSongs(songs: List<Song>) {
@@ -143,6 +143,8 @@ class SongRepository @Inject constructor(
             // Create downloaded song with local paths
             val downloadedSong = song.copy(
                 path = audioFile.absolutePath,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis(),
                 coverUrl = if (artworkFile.exists()) artworkFile.absolutePath else song.coverUrl,
                 isDownloaded = true
             )

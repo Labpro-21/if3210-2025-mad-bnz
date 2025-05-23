@@ -10,7 +10,8 @@
     android:focusable="true"
     android:elevation="12dp"
     android:visibility="gone"
-    tools:visibility="visible">
+    tools:visibility="visible"
+    >
 
     <ImageView
         android:id="@+id/miniPlayerCover"

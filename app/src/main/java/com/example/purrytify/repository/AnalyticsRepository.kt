@@ -2,13 +2,21 @@ package com.example.purrytify.repository
 
 import android.net.Uri
 import com.example.purrytify.model.PlayHistoryEntity
+import com.example.purrytify.model.Song
+import com.example.purrytify.model.analytics.SoundCapsule
 import com.example.purrytify.room.AnalyticsDao
+import com.example.purrytify.utils.FileExporter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.datetime.LocalDate
+import java.text.SimpleDateFormat
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
+
+
 
 @Singleton
 class AnalyticsRepository @Inject constructor(
@@ -20,7 +28,9 @@ class AnalyticsRepository @Inject constructor(
             PlayHistoryEntity(
                 songId = songId,
                 userId = userId,
-                duration = duration
+                playedAt = System.currentTimeMillis(),
+                duration = duration,
+                date = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(System.currentTimeMillis())
             )
         )
     }
@@ -33,7 +43,9 @@ class AnalyticsRepository @Inject constructor(
             analyticsDao.getSongStreaks(userId)
         ) { timeListened, topArtists, topSongs, streaks ->
             SoundCapsule(
-                timeListened = timeListened / (1000 * 60), // Convert to minutes
+                month = yearMonth.substringAfterLast("-"),
+                year = yearMonth.substringBefore("-").toInt(),
+                timeListened = timeListened / (60 * 1000), // Convert milliseconds to minutes
                 topArtists = topArtists,
                 topSongs = topSongs,
                 streaks = streaks
@@ -48,3 +60,4 @@ class AnalyticsRepository @Inject constructor(
         return fileExporter.exportToCsv(capsule, "analytics_$yearMonth.csv")
     }
 }
+

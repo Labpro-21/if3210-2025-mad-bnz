@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.purrytify.auth.TokenManager
 import com.example.purrytify.model.ApiResponse
 import com.example.purrytify.model.Song
 import com.example.purrytify.model.User
@@ -22,7 +23,8 @@ class HomeViewModel @Inject constructor(
     private val songRepository: SongRepository,
     private val userRepository: UserRepository,
     private val onlineSongRepository: OnlineSongRepository,
-    private val musicPlayerManager: MusicPlayerManager
+    private val musicPlayerManager: MusicPlayerManager,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
     private val _userInfo = MutableLiveData<User?>()
@@ -110,5 +112,8 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             songRepository.updateSong(song.copy(isLiked = !song.isLiked))
         }
+    }
+    fun getCurrentUserCountry(): String {
+        return tokenManager.getUserCountry() ?: throw IllegalStateException("User not logged in")
     }
 }

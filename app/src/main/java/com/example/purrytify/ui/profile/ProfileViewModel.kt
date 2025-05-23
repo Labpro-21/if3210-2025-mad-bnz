@@ -16,18 +16,24 @@ import com.example.purrytify.model.User
 import com.example.purrytify.network.ApiService
 import com.example.purrytify.player.MusicPlayerManager
 import com.example.purrytify.repository.SongRepository
+import com.example.purrytify.repository.SoundCapsuleRepository
 import com.example.purrytify.repository.UserRepository
+import com.example.purrytify.ui.profile.analytics.MonthlyStats
 import com.example.purrytify.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
+import java.util.Calendar
 import javax.inject.Inject
+import androidx.core.net.toFile
+
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -36,7 +42,8 @@ class ProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val apiService: ApiService,
     private val musicPlayerManager: MusicPlayerManager,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val soundCapsuleRepository: SoundCapsuleRepository
 ) : ViewModel() {
 
     private val _profile = MutableStateFlow<ApiResponse<User>>(ApiResponse.Loading)
@@ -58,6 +65,39 @@ class ProfileViewModel @Inject constructor(
     val isPlaying = musicPlayerManager.isPlaying
     val currentPosition = musicPlayerManager.currentPosition
 
+    private val _soundCapsule = MutableLiveData<MonthlyStats>()
+    val soundCapsule: LiveData<MonthlyStats> = _soundCapsule
+
+    private val _updateProfileState = MutableLiveData<ApiResponse<Unit>>()
+    val updateProfileState: LiveData<ApiResponse<Unit>> = _updateProfileState
+
+    init {
+        loadProfile()
+        loadSoundCapsule()
+    }
+
+    private fun loadSoundCapsule() {
+        viewModelScope.launch {
+            try {
+                val userId = tokenManager.getUserId() ?: return@launch
+                val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
+                val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+
+                soundCapsuleRepository.getMonthlyCapsule(userId, currentMonth, currentYear)
+                    .collectLatest { capsule ->
+                        _soundCapsule.value = capsule
+                    }
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Error loading sound capsule", e)
+            }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            tokenManager.clearTokens()
+        }
+    }
 
     fun loadProfile() {
         _profile.value = ApiResponse.Loading
@@ -142,5 +182,53 @@ class ProfileViewModel @Inject constructor(
                 Log.e("ProfileViewModel", "Error uploading profile photo", e)
             }
         }
+    }
+
+    fun updateProfile(location: String?, imageUri: Uri?) {
+        viewModelScope.launch {
+            _updateProfileState.value = ApiResponse.Loading
+            try {
+                val token = tokenManager.getAccessToken() ?: throw Exception("No token found")
+                val multipartBuilder = MultipartBody.Builder().setType(MultipartBody.FORM)
+
+
+                location?.let {
+                    multipartBuilder.addFormDataPart("location", it)
+                }
+
+
+                imageUri?.let { uri ->
+                    val file = createTempFileFromUri(uri)
+                    val requestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
+                    multipartBuilder.addFormDataPart("profilePhoto", file.name, requestBody)
+                }
+
+                val response = apiService.updateProfile(
+                    "Bearer $token",
+                    multipartBuilder.build()
+                )
+
+                if (response.isSuccessful) {
+                    _updateProfileState.value = ApiResponse.Success(Unit)
+                    loadProfile()
+                } else {
+                    _updateProfileState.value = ApiResponse.Error("Update failed: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                _updateProfileState.value = ApiResponse.Error(e.message ?: "Update failed")
+            }
+        }
+    }
+
+    fun createTempFileFromUri(uri: Uri): File {
+        val tempFile = File.createTempFile("profile_", ".jpg").apply {
+            deleteOnExit()
+        }
+        uri.toFile().inputStream().use { input ->
+            tempFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        return tempFile
     }
 }

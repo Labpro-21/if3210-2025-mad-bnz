@@ -49,9 +49,10 @@ class HomeFragment : BaseFragment() {
         }
 
         // For country charts
+        val userCountry = viewModel.userInfo.value?.location ?: "ID"
         binding.cardCountryCharts.setOnClickListener {
             val bundle = Bundle().apply {
-                putString("chartType", "country")
+                putString("chartType",userCountry )
             }
             findNavController().navigate(
                 R.id.action_homeFragment_to_chartsFragment,

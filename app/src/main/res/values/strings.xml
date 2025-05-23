@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">purritify</string>
+    <string name="streak_title">You had a %d-day streak</string>
+    <string name="streak_description">You played %1$s by %2$s day after day. You were on fire</string>
 </resources>

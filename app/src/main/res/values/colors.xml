@@ -16,6 +16,7 @@
     <color name="gray_800">#333333</color>
     <color name="gray_900">#212121</color>
     <color name="mini_player_bg">#282828</color>
+    <color name="darker_gray">#1A1A1A</color>
 
     <color name="colorBackground">#121212</color>
     <color name="colorTextPrimary">#FFFFFF</color>
@@ -23,5 +24,6 @@
     <color name="colorError">#CF6679</color>
     <color name="colorIconInactive">#80FFFFFF</color>
     <color name="colorAccent">@color/spotify_green</color>
-
+    <color name="yellow">#FFE600</color>
+    <color name="blue">#1E90FF</color>
 </resources>

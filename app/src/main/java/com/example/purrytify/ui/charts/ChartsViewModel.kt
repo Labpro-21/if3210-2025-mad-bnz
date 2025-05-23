@@ -72,7 +72,7 @@ class ChartsViewModel @Inject constructor(
                                 _songs.value = songs
                             }
                     }
-                    "country" -> {
+                    else -> {
                         songRepository.getCountryTopSongs()
                             .collect { songs ->
                                 _songs.value = songs

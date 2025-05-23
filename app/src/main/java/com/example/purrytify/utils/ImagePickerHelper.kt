@@ -8,7 +8,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import java.io.File
 
 class ImagePickerHelper(
     private val fragment: Fragment,
@@ -83,5 +85,39 @@ class ImagePickerHelper(
             type = "image/*"
         }
         imagePickerLauncher.launch(intent)
+    }
+
+    private val cameraLauncher = fragment.registerForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            temporaryImageUri?.let(onImageSelected)
+        }
+    }
+
+    private val galleryLauncher = fragment.registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let(onImageSelected)
+    }
+
+    private var temporaryImageUri: Uri? = null
+
+    fun launchCamera() {
+        val tempFile = File.createTempFile(
+            "JPEG_${System.currentTimeMillis()}_",
+            ".jpg",
+            fragment.requireContext().cacheDir
+        )
+        temporaryImageUri = FileProvider.getUriForFile(
+            fragment.requireContext(),
+            "${fragment.requireContext().packageName}.provider",
+            tempFile
+        )
+        cameraLauncher.launch(temporaryImageUri)
+    }
+
+    fun launchGallery() {
+        galleryLauncher.launch("image/*")
     }
 }

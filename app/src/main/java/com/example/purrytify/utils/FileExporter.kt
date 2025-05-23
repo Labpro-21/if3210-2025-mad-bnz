@@ -3,6 +3,7 @@ package com.example.purrytify.utils
 import android.content.Context
 import android.net.Uri
 import androidx.core.content.FileProvider
+import com.example.purrytify.model.analytics.SoundCapsule
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
@@ -12,30 +13,28 @@ import javax.inject.Singleton
 class FileExporter @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    fun exportToCsv(capsule: SoundCapsule, filename: String): Uri {
-        val csvContent = buildString {
-            appendLine("Sound Capsule Analytics")
-            appendLine()
-            appendLine("Time Listened: ${capsule.timeListened} minutes")
-            appendLine()
-            appendLine("Top Artists:")
+    fun exportToCsv(capsule: SoundCapsule, fileName: String): Uri {
+        val csvFile = File(context.cacheDir, fileName)
+        csvFile.writer().use { writer ->
+            writer.write("Monthly Analytics Report\n")
+            writer.write("Month: ${capsule.month}/${capsule.year}\n")
+            writer.write("Total Time Listened: ${capsule.timeListened} minutes\n\n")
+            
+            writer.write("Top Artists:\n")
             capsule.topArtists.forEach { artist ->
-                appendLine("${artist.name},${artist.playCount} plays")
+                writer.write("${artist.name},${artist.playCount}\n")
             }
-            appendLine()
-            appendLine("Top Songs:")
+            
+            writer.write("\nTop Songs:\n")
             capsule.topSongs.forEach { song ->
-                appendLine("${song.title},${song.artist},${song.playCount} plays")
-            }
-            appendLine()
-            appendLine("Streaks:")
-            capsule.streaks.forEach { streak ->
-                appendLine("${streak.songTitle},${streak.daysCount} days,${streak.startDate} - ${streak.endDate}")
+                writer.write("${song.title},${song.artist},${song.playCount}\n")
             }
         }
-
-        val file = File(context.cacheDir, filename)
-        file.writeText(csvContent)
-        return FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+        
+        return FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            csvFile
+        )
     }
 }

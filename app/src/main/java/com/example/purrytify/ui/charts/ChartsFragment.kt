@@ -12,8 +12,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.purrytify.R
+import com.example.purrytify.auth.TokenManager
 import com.example.purrytify.databinding.FragmentChartsBinding
 import com.example.purrytify.model.DownloadStatus
+import com.example.purrytify.utils.CountryUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -31,6 +33,7 @@ class ChartsFragment : Fragment() {
             viewModel.downloadSong(onlineSong)
         }
     )
+//    private val country = TokenManager.
     private var chartType: String = "global"
 
     companion object {
@@ -59,19 +62,21 @@ class ChartsFragment : Fragment() {
         setupObservers()
         viewModel.loadCharts(chartType)
         // Observe download status
-        viewModel.downloadStatus.observe(viewLifecycleOwner) { status ->
-            when (status) {
-                is DownloadStatus.Success -> {
-                    Toast.makeText(context, "Download completed", Toast.LENGTH_SHORT).show()
-                }
-                is DownloadStatus.Error -> {
-                    Toast.makeText(context, "Download failed: ${status.message}", Toast.LENGTH_SHORT).show()
-                }
-                is DownloadStatus.Progress -> {
-                    // Progress is handled by the adapter
-                }
-            }
-        }
+//        viewModel.downloadStatus.observe(viewLifecycleOwner) { status ->
+//            when (status) {
+//                is DownloadStatus.Success -> {
+//                    Toast.makeText(context, "Download completed", Toast.LENGTH_SHORT).show()
+//                }
+//                is DownloadStatus.Error -> {
+//                    Toast.makeText(context, "Download failed: ${status.message}", Toast.LENGTH_SHORT).show()
+//                }
+//                is DownloadStatus.Progress -> {
+//                    // Progress is handled by the adapter
+//                }
+//
+//
+//            }
+//        }
     }
     private fun setupUI(chartType: String) {
         binding.apply {
@@ -82,9 +87,9 @@ class ChartsFragment : Fragment() {
                     tvChartTitle.text = "Top 50"
                     tvChartSubtitle.text = "GLOBAL"
                 }
-                "country" -> {
+                else -> {
                     tvChartTitle.text = "Top 10"
-                    tvChartSubtitle.text = "YOUR COUNTRY"
+                    tvChartSubtitle.text = CountryUtils.getCountryName(chartType)
                 }
             }
 
@@ -106,6 +111,10 @@ class ChartsFragment : Fragment() {
         viewModel.songs.observe(viewLifecycleOwner) { songs ->
             songAdapter.submitList(songs)
         }
+
+//        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+//            binding.loadingProgress.isVisible = isLoading
+//        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.downloadProgress.collect { progressMap ->

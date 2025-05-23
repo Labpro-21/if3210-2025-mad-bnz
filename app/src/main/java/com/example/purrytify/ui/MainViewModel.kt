@@ -16,7 +16,7 @@ class MainViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
-            tokenManager.clearTokens()
+            tokenManager.clearAll()
             authRepository.logout()
         }
     }

@@ -8,7 +8,9 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import android.media.AudioAttributes
+import com.example.purrytify.auth.TokenManager
 import com.example.purrytify.model.Song
+import com.example.purrytify.repository.AnalyticsRepository
 import com.example.purrytify.repository.OnlineSongRepository
 import com.example.purrytify.repository.SongRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -31,13 +33,14 @@ class MusicPlayerManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val songRepository: SongRepository,
     private val onlineSongRepository: OnlineSongRepository,
-    private val analyticsRepository: AnalyticsRepository
+    private val analyticsRepository: AnalyticsRepository,
+    private val tokenManager: TokenManager
 ) {
     private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var mediaPlayer: MediaPlayer? = null
     private var isInitialized = false
     private var positionUpdateJob: Job? = null
-    private val BUFFER_SIZE = 512 * 1024
+    private val BUFFER_SIZE = 16 * 1024 * 1024
     private var isPreparing = false
 
     private val _currentSong = MutableLiveData<Song?>()
@@ -84,8 +87,12 @@ class MusicPlayerManager @Inject constructor(
         OFF, REPEAT_ALL, REPEAT_ONE
     }
 
-    private var errorRetryCount = 0
+    private var retryCount = 0
     private val MAX_RETRY_ATTEMPTS = 3
+
+    private fun getCurrentUserId(): String {
+        return tokenManager.getUserId() ?: throw IllegalStateException("User not logged in")
+    }
 
     init {
         // Load initial state from local storage
@@ -99,7 +106,8 @@ class MusicPlayerManager @Inject constructor(
             onlineSongRepository.getGlobalTopSongs().collect { songs ->
                 songRepository.addOrUpdateOnlineSongs(songs)
             }
-            onlineSongRepository.getCountryTopSongs("ID").collect { songs ->
+            Log.e("COUNTRYY",tokenManager.getUserCountry().toString())
+            onlineSongRepository.getCountryTopSongs(tokenManager.getUserCountry().toString()).collect { songs ->
                 songRepository.addOrUpdateOnlineSongs(songs)
             }
         } catch (e: Exception) {
@@ -150,24 +158,47 @@ class MusicPlayerManager @Inject constructor(
                                 .build()
                         )
 
-                        setOnErrorListener { _, what, extra ->
+                        setOnErrorListener { mp, what, extra ->
                             Log.e("MusicPlayerManager", "MediaPlayer error: $what, $extra for path: ${song.path}")
-                            isPreparing = false
-                            _isPlaying.postValue(false)
-                            releaseMediaPlayer()
-                            true
+
+                            if (retryCount < MAX_RETRY_ATTEMPTS) {
+                                retryCount++
+                                viewModelScope.launch {
+                                    delay(1000) // Wait a second before retrying
+                                    playSong(song) // Retry playback
+                                }
+                                true
+                            } else {
+                                retryCount = 0
+                                isPreparing = false
+                                _isPlaying.postValue(false)
+                                releaseMediaPlayer()
+                                true
+                            }
                         }
 
                         if (song.isLocal || song.isDownloaded) {
-                            Log.e("Song path offline",song.path)
-                            setDataSource(context, Uri.parse(song.path))
+                            val file = File(song.path)
+                            if (file.exists()) {
+                                setDataSource(context, Uri.parse(song.path))
+                            } else {
+                                throw IOException("Local file not found")
+                            }
                         } else {
-                            Log.e("Song path online",song.path)
                             setDataSource(song.path)
                         }
 
+                        if (!song.isLocal && !song.isDownloaded) {
+                            val headers = HashMap<String, String>()
+                            headers["User-Agent"] = "PurrytifyPlayer/1.0"
+                            headers["Connection"] = "keep-alive"
+                            headers["Cache-Control"] = "no-cache"
+                        }
+
+                        prepareAsync()
+
                         setOnPreparedListener {
-                            errorRetryCount = 0
+                            retryCount = 0
                             isPreparing = false
                             start()
                             _isPlaying.postValue(true)
@@ -187,7 +218,7 @@ class MusicPlayerManager @Inject constructor(
                             playNextSong()
                         }
 
-                        prepareAsync()
+//                        prepareAsync()
                     } catch (e: Exception) {
                         Log.e("MusicPlayerManager", "Error setting up MediaPlayer for path: ${song.path}", e)
                         releaseMediaPlayer()
@@ -270,38 +301,6 @@ class MusicPlayerManager @Inject constructor(
         Log.d("MusicPlayerManager", "Repeat mode changed to: $nextMode")
     }
 
-//    fun playNextSong() {
-//        viewModelScope.launch {
-//            val currentSong = _currentSong.value ?: return@launch
-//
-//            if (_repeatMode.value == RepeatMode.REPEAT_ONE) {
-//                mediaPlayer?.seekTo(0)
-//                mediaPlayer?.start()
-//                _isPlaying.postValue(true)
-//                return@launch
-//            }
-//
-//            try {
-//                val playlist = _currentPlaylist.value ?: return@launch
-//                if (playlist.isEmpty()) return@launch
-//
-//                val currentIndex = playlist.indexOfFirst { it.id == currentSong.id }
-//                val nextSong = when {
-//                    _isShuffleEnabled.value == true -> {
-//                        playlist.filter { it.id != currentSong.id }.randomOrNull()
-//                    }
-//                    currentIndex < playlist.size - 1 -> playlist[currentIndex + 1]
-//                    _repeatMode.value == RepeatMode.REPEAT_ALL -> playlist.firstOrNull()
-//                    else -> null
-//                }
-//
-//                nextSong?.let { playSong(it) }
-//            } catch (e: Exception) {
-//                Log.e("MusicPlayerManager", "Error playing next song", e)
-//            }
-//        }
-//    }
-//
 
     fun playNextSong() {
         val currentSong = _currentSong.value ?: return
@@ -332,42 +331,6 @@ class MusicPlayerManager @Inject constructor(
     }
 
 
-//    fun playPreviousSong() {
-//        viewModelScope.launch {
-//            val currentSong = _currentSong.value ?: return@launch
-//
-//            if (getCurrentPosition() > 3000) {
-//                mediaPlayer?.seekTo(0)
-//                return@launch
-//            }
-//
-//            try {
-//                val playlist = _currentPlaylist.value ?: return@launch
-//                if (playlist.isEmpty()) return@launch
-//
-//                val currentIndex = playlist.indexOfFirst { it.id == currentSong.id }
-//                val previousSong = when {
-//                    _isShuffleEnabled.value == true -> {
-//                        val availableSongs = if (playlist.size > 1) {
-//                            playlist.filter { it.id != currentSong.id }
-//                        } else {
-//                            playlist
-//                        }
-//                        availableSongs.random()
-//                    }
-//                    currentIndex > 0 -> playlist[currentIndex - 1]
-//                    _repeatMode.value == RepeatMode.REPEAT_ALL -> playlist.lastOrNull()
-//                    else -> null
-//                }
-//
-//                previousSong?.let {
-//                    playSong(it)
-//                }
-//            } catch (e: Exception) {
-//                Log.e("MusicPlayerManager", "Error playing previous song", e)
-//            }
-//        }
-//    }
 
     fun playPreviousSong() {
         val currentSong = _currentSong.value ?: return

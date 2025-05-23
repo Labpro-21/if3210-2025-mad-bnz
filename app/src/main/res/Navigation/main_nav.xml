@@ -48,8 +48,26 @@
         <action
             android:id="@+id/action_profileFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_editProfileFragment"
+            app:destination="@id/editProfileFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_topArtistsFragment"
+            app:destination="@id/topArtistsFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_topSongsFragment"
+            app:destination="@id/topSongsFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_timeListenedFragment"
+            app:destination="@id/timeListenedFragment" />
     </fragment>
 
+    <!-- Edit Profile Fragment -->
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.example.purrytify.ui.profile.EditProfileFragment"
+        android:label="Edit Profile"
+        tools:layout="@layout/fragment_edit_profile" />
 
     <!-- Settings Fragment -->
     <fragment
@@ -88,6 +106,25 @@
             app:argType="string" />
     </fragment>
 
+
+    <fragment
+        android:id="@+id/topArtistsFragment"
+        android:name="com.example.purrytify.ui.profile.analytics.TopArtistsFragment"
+        android:label="Top Artists">
+        <action
+            android:id="@+id/action_profileFragment_to_topArtistsFragment"
+            app:destination="@id/topArtistsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/topSongsFragment"
+        android:name="com.example.purrytify.ui.profile.analytics.TopSongsFragment"
+        android:label="Top Songs" />
+
+    <fragment
+        android:id="@+id/timeListenedFragment"
+        android:name="com.example.purrytify.ui.profile.analytics.TimeListenedFragment"
+        android:label="Listening History" />
 
     <activity
         android:id="@+id/loginActivity"

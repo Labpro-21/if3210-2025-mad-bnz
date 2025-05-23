@@ -28,23 +28,26 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val response = apiService.login(LoginRequest(email, password))
-                if (response.isSuccessful) {
-                    val loginResponse = response.body()
+                val loginResponse = apiService.login(LoginRequest(email, password))
 
+                if (loginResponse.isSuccessful && loginResponse.body() != null) {
+                    val token = loginResponse.body()!!.accessToken
+                    tokenManager.saveAccessToken(token)
+                    loginResponse.body()!!.refreshToken?.let {
+                        tokenManager.saveRefreshToken(it)
+                    }
 
-                    if (loginResponse?.accessToken != null) {
-                        tokenManager.saveAccessToken(loginResponse.accessToken)
-                        if (loginResponse.refreshToken != null) {
-                            tokenManager.saveRefreshToken(loginResponse.refreshToken)
-                        }
+                    // Fetch user profile
+                    val profileResponse = apiService.getProfile("Bearer $token")
+                    if (profileResponse.isSuccessful && profileResponse.body() != null) {
+                        val user = profileResponse.body()!!
+                        tokenManager.saveUserInfo(user.id, user.location)
                         _loginState.value = ApiResponse.Success(Unit)
-
                     } else {
-                        _loginState.value = ApiResponse.Error("Server returned empty token")
+                        _loginState.value = ApiResponse.Error("Failed to fetch user profile")
                     }
                 } else {
-                    _loginState.value = ApiResponse.Error("Login failed: ${response.message()}")
+                    _loginState.value = ApiResponse.Error("Login failed: ${loginResponse.message()}")
                 }
             } catch (e: Exception) {
                 _loginState.value = ApiResponse.Error("Network error: ${e.message}")
@@ -53,6 +56,6 @@ class AuthViewModel @Inject constructor(
     }
 
     fun logout() {
-        tokenManager.clearTokens()
+        tokenManager.clearAll()
     }
 }
