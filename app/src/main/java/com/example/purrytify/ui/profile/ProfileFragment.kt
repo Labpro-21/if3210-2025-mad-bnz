@@ -88,6 +88,7 @@ class ProfileFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.loadProfile()
                 viewModel.profile.collect { response ->
                     when (response) {
                         is ApiResponse.Loading -> {

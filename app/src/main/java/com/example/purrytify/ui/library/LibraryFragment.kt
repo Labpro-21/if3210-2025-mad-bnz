@@ -266,7 +266,8 @@ class LibraryFragment : BaseFragment() {
                     coverUrl = albumArtUrl,
                     duration = 0,
                     isLiked = false,
-                    lastPlayed = 0
+                    lastPlayed = 0,
+                    isLocal = true,
                 )
                 viewModel.insertSong(newSong)
                 requireContext().showToast("Song added successfully")
