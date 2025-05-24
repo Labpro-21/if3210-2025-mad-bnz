@@ -34,6 +34,7 @@ import java.util.Calendar
 import javax.inject.Inject
 import androidx.core.net.toFile
 import androidx.lifecycle.AndroidViewModel
+import com.example.purrytify.repository.AnalyticsRepository
 import dagger.hilt.android.internal.Contexts.getApplication
 import okhttp3.MultipartBody
 
@@ -49,6 +50,7 @@ class ProfileViewModel @Inject constructor(
     private val musicPlayerManager: MusicPlayerManager,
     private val tokenManager: TokenManager,
     private val soundCapsuleRepository: SoundCapsuleRepository,
+    private val analyticsRepository: AnalyticsRepository,
     application: Application
 ) : AndroidViewModel(application) {
 
@@ -80,6 +82,9 @@ class ProfileViewModel @Inject constructor(
     private val _userData = MutableLiveData<User?>(null)
     val userData: LiveData<User?> = _userData
 
+    private val _exportState = MutableLiveData<ExportState>()
+    val exportState: LiveData<ExportState> = _exportState
+
     init {
         loadProfile()
         loadSoundCapsule()
@@ -100,6 +105,10 @@ class ProfileViewModel @Inject constructor(
                 Log.e("ProfileViewModel", "Error loading sound capsule", e)
             }
         }
+    }
+
+    fun resetExportState() {
+        _exportState.value = ExportState.Idle
     }
 
     fun updateLocation(location: String) {
@@ -269,5 +278,31 @@ class ProfileViewModel @Inject constructor(
         return tempFile
     }
 
+    fun exportToCSV() {
+        viewModelScope.launch {
+            _exportState.value = ExportState.Loading
+            try {
+                val userId = tokenManager.getUserId() ?: throw Exception("User not logged in")
+                val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
+                val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+                val yearMonth = "$currentYear-${String.format("%02d", currentMonth)}"
 
+                val uri = analyticsRepository.exportAnalytics(userId, yearMonth)
+                _exportState.value = ExportState.Success(uri)
+            } catch (e: Exception) {
+                _exportState.value = ExportState.Error(e.message ?: "Export failed")
+            }
+        }
+    }
+
+
+
+
+}
+
+sealed class ExportState {
+    object Idle : ExportState()
+    object Loading : ExportState()
+    data class Success(val uri: Uri) : ExportState()
+    data class Error(val message: String) : ExportState()
 }

@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background Gradient -->
     <item>
         <shape android:shape="rectangle">
             <gradient
                 android:angle="315"
-                android:endColor="#1DB954"
-                android:startColor="#191414" />
+                android:startColor="#191414"
+                android:centerColor="#4B0082"
+                android:endColor="#9370DB"
+                android:type="linear" />
         </shape>
     </item>
+
+    <!-- Chart Icon -->
     <item
         android:width="120dp"
         android:height="120dp"
@@ -17,9 +22,39 @@
             android:height="120dp"
             android:viewportWidth="24"
             android:viewportHeight="24">
-            <path
-                android:fillColor="#FFFFFF"
-                android:pathData="M7,3H17V21H7V3M9,5V19H15V5H9M11,7H13V9H11V7M11,11H13V13H11V11M11,15H13V17H11V15Z"/>
+            <group
+                android:pivotX="12"
+                android:pivotY="12"
+                android:rotation="0">
+                <!-- Bar 1 -->
+                <path
+                    android:fillColor="#FFFFFF"
+                    android:pathData="M4,20h3v-8H4V20z"/>
+                <!-- Bar 2 -->
+                <path
+                    android:fillColor="#FFFFFF"
+                    android:pathData="M9,20h3V8H9V20z"/>
+                <!-- Bar 3 -->
+                <path
+                    android:fillColor="#FFFFFF"
+                    android:pathData="M14,20h3V4h-3V20z"/>
+                <!-- Bar 4 -->
+                <path
+                    android:fillColor="#FFFFFF"
+                    android:pathData="M19,20h3v-12h-3V20z"/>
+            </group>
         </vector>
+    </item>
+
+    <!-- Shine Effect -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="45"
+                android:centerColor="#00FFFFFF"
+                android:endColor="#00FFFFFF"
+                android:startColor="#33FFFFFF"
+                android:type="linear" />
+        </shape>
     </item>
 </layer-list>

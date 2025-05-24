@@ -20,6 +20,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.purrytify.R
 import com.example.purrytify.auth.LoginActivity
 import com.example.purrytify.auth.TokenRefreshService
@@ -32,6 +33,7 @@ import com.example.purrytify.player.PlayerViewModel
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -135,6 +137,8 @@ class MainActivity : AppCompatActivity() {
             Glide.with(this)
                 .load(song.coverUrl)
                 .placeholder(R.drawable.ic_placeholder_album)
+                .transform(RoundedCorners(10))
+                .override(48, 48)
                 .into(coverImage)
 
             lifecycleScope.launch {
@@ -203,6 +207,7 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onDestroy() {
         super.onDestroy()
+//        lifecycleScope.coroutineContext.cancelChildren()
         musicPlayerManager.cleanup()
         unregisterReceiver(logoutReceiver)
         networkStatusHelper.unregister()

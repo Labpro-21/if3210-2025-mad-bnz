@@ -10,7 +10,16 @@
         android:id="@+id/playerFragment"
         android:name="com.example.purrytify.ui.player.PlayerFragment"
         android:label="Player"
-        tools:layout="@layout/fragment_player" />
+        tools:layout="@layout/fragment_player"
+        >
+        <action
+        android:id="@+id/action_global_playerFragment"
+        app:destination="@id/playerFragment"
+        app:enterAnim="@anim/slide_up"
+        app:exitAnim="@anim/fade_out"
+        app:popEnterAnim="@anim/fade_in"
+        app:popExitAnim="@anim/slide_down"/>
+    </fragment>
 
     <!-- Home Fragment -->
     <fragment
@@ -23,7 +32,14 @@
             app:destination="@id/navigation_to_player" />
         <action
             android:id="@+id/action_homeFragment_to_playerFragment"
-            app:destination="@id/playerFragment" />
+            app:destination="@id/playerFragment"
+            app:enterAnim="@anim/slide_up"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_down"/>
+        <action
+            android:id="@+id/action_homeFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
         <action
             android:id="@+id/action_homeFragment_to_chartsFragment"
             app:destination="@id/chartsFragment"
@@ -60,6 +76,13 @@
         <action
             android:id="@+id/action_profileFragment_to_timeListenedFragment"
             app:destination="@id/timeListenedFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_shareCapsuleFragment"
+            app:destination="@id/shareCapsuleFragment" />
+
+        <action
+            android:id="@+id/action_profileFragment_to_shareStreakFragment"
+            app:destination="@id/shareStreakFragment" />
     </fragment>
 
     <!-- Edit Profile Fragment -->
@@ -106,6 +129,24 @@
             app:argType="string" />
     </fragment>
 
+    <fragment
+        android:id="@+id/shareCapsuleFragment"
+        android:name="com.example.purrytify.ui.profile.ShareCapsuleFragment"
+        android:label="ShareCapsuleFragment"
+        >
+        <argument
+            android:name="stats"
+            app:argType="com.example.purrytify.ui.profile.analytics.MonthlyStats" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/shareStreakFragment"
+        android:name="com.example.purrytify.ui.profile.ShareStreakFragment"
+        android:label="ShareStreakFragment">
+        <argument
+            android:name="streak"
+            app:argType="com.example.purrytify.model.analytics.SongStreakStats" />
+    </fragment>
 
     <fragment
         android:id="@+id/topArtistsFragment"

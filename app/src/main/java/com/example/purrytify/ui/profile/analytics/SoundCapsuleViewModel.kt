@@ -1,5 +1,7 @@
 package com.example.purrytify.ui.profile.analytics
 
+import android.net.Uri
+import android.os.Parcelable
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -15,6 +17,7 @@ import com.example.purrytify.model.analytics.TopSongStats
 import com.example.purrytify.repository.AnalyticsRepository
 import com.example.purrytify.repository.SoundCapsuleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.parcelize.Parcelize
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
@@ -33,9 +36,28 @@ class SoundCapsuleViewModel @Inject constructor(
     private val _timeListened = MutableLiveData<TimeListeningStats>()
     val timeListened: LiveData<TimeListeningStats> = _timeListened
 
+
+
     init {
         loadMonthlyStats()
     }
+
+//    fun exportToCSV() {
+//        viewModelScope.launch {
+//            _exportState.value = ExportState.Loading
+//            try {
+//                val userId = tokenManager.getUserId() ?: throw Exception("User not logged in")
+//                val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
+//                val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+//                val yearMonth = "$currentYear-${String.format("%02d", currentMonth)}"
+//
+//                val uri = analyticsRepository.exportAnalytics(userId, yearMonth)
+//                _exportState.value = ExportState.Success(uri)
+//            } catch (e: Exception) {
+//                _exportState.value = ExportState.Error(e.message ?: "Export failed")
+//            }
+//        }
+//    }
 
     fun loadMonthlyStats() {
         viewModelScope.launch {
@@ -76,7 +98,7 @@ class SoundCapsuleViewModel @Inject constructor(
         return emptyList() // Placeholder
     }
 }
-
+@Parcelize
 data class MonthlyStats(
     val monthYear: String,
     val totalMinutes: Long,
@@ -86,10 +108,12 @@ data class MonthlyStats(
     val streakInfo: StreakInfo?,
     val dailyData: List<DailyListening>,
     val currentStreak: SongStreakStats? = null
-)
+) : Parcelable
 
+@Parcelize
 data class TimeListeningStats(
     val totalMinutes: Int,
     val dailyAverage: Int,
     val dailyData: List<DailyListening>
-)
+) : Parcelable
+

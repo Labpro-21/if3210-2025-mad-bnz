@@ -1,112 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#1A1A1A"
-    android:orientation="vertical"
-    android:padding="16dp"
-    >
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Your Sound Capsule"
-            android:textColor="@color/white"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <ImageButton
-            android:id="@+id/btnDownload"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_download"
-            app:tint="@color/white" />
-
-        <ImageButton
-            android:id="@+id/btnShare"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_share"
-            app:tint="@color/white" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/tvDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textColor="@color/gray"
-        android:textSize="14sp"
-        tools:text="April 2025" />
-
-    <!-- Time Listened Section -->
-    <LinearLayout
-        android:id="@+id/layoutTimeListened"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="#252525"
-        android:foreground="?attr/selectableItemBackground"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Time listened"
-            android:textColor="@color/gray" />
-
-        <TextView
-            android:id="@+id/tvTimeListened"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="@color/spotify_green"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            tools:text="862 minutes" />
-
-        <ImageView
-            android:id="@+id/MoreTimeListened"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="end"
-            android:layout_marginTop="-24dp"
-            android:src="@drawable/ic_chevron_right"
-            app:tint="@color/gray" />
-    </LinearLayout>
-
-    <!-- Top Artists and Songs Grid -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp">
-
-    <!-- Top Artist -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/layoutTopArtist"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:background="#252525"
-        android:foreground="?attr/selectableItemBackground"
-        app:cardBackgroundColor="#252525"
-        app:cardCornerRadius="8dp"
-        app:layout_constraintEnd_toStartOf="@+id/layoutTopSong"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.5">
+    app:cardBackgroundColor="#1A1A1A"
+    app:cardCornerRadius="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -114,96 +15,211 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Top artist"
-            android:textColor="@color/gray" />
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Your Sound Capsule"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/btnDownload"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_download"
+                app:tint="@color/white" />
+
+            <ImageButton
+                android:id="@+id/btnShare"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_share"
+                app:tint="@color/white" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/tvTopArtist"
+            android:id="@+id/tvDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="@color/blue"
-            android:textSize="16sp"
-            tools:text="The Beatles" />
-
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/ivTopArtist"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
             android:layout_marginTop="8dp"
-            android:scaleType="centerCrop"
-            app:shapeAppearanceOverlay="@style/RoundedImageView" />
+            android:textColor="@color/gray"
+            android:textSize="14sp"
+            tools:text="April 2025" />
 
-        <ImageView
-            android:id="@+id/MoreTopArtist"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="end"
-            android:src="@drawable/ic_chevron_right"
-            app:tint="@color/gray" />
-    </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
-        <!-- Top Song -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/layoutTopSong"
-            android:layout_width="0dp"
+        <!-- Time Listened Section -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:background="#252525"
-            android:foreground="?attr/selectableItemBackground"
+            android:layout_marginTop="16dp"
             app:cardBackgroundColor="#252525"
             app:cardCornerRadius="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/layoutTopArtist"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.5">
+            app:cardElevation="0dp">
 
             <LinearLayout
+                android:id="@+id/layoutTimeListened"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:foreground="?attr/selectableItemBackground"
                 android:orientation="vertical"
                 android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Top song"
-                    android:textColor="@color/gray" />
+                    android:text="Time listened"
+                    android:textColor="@color/gray"/>
 
                 <TextView
-                    android:id="@+id/tvTopSong"
+                    android:id="@+id/tvTimeListened"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textColor="@color/yellow"
-                    android:textSize="16sp"
-                    tools:text="Starboy" />
-
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivTopSong"
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="8dp"
-                    android:scaleType="centerCrop"
-                    app:shapeAppearanceOverlay="@style/RoundedImageView" />
+                    android:textColor="@color/spotify_green"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    tools:text="862 minutes"/>
 
                 <ImageView
-                    android:id="@+id/MoreTopSong"
+                    android:id="@+id/MoreTimeListened"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="end"
+                    android:layout_marginTop="-24dp"
                     android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/gray" />
+                    app:tint="@color/gray"/>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <!-- Top Artists and Songs Grid -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
+
+            <!-- Top Artist -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/layoutTopArtist"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="#252525"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#252525"
+                app:cardCornerRadius="8dp"
+                app:layout_constraintEnd_toStartOf="@+id/layoutTopSong"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.48">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Top artist"
+                        android:textColor="@color/gray" />
+
+                    <TextView
+                        android:id="@+id/tvTopArtist"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textColor="@color/blue"
+                        android:textSize="16sp"
+                        tools:text="The Beatles" />
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivTopArtist"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="8dp"
+                        android:scaleType="centerCrop"
+                        app:shapeAppearanceOverlay="@style/RoundedImageView"
+                        tools:src="@drawable/placeholder_album"/>
+
+                    <ImageView
+                        android:id="@+id/MoreTopArtist"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="end"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/gray" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Top Song -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/layoutTopSong"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="#252525"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#252525"
+                app:cardCornerRadius="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/layoutTopArtist"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.48">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Top song"
+                        android:textColor="@color/gray" />
+
+                    <TextView
+                        android:id="@+id/tvTopSong"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textColor="@color/yellow"
+                        android:textSize="16sp"
+                        tools:text="Starboy" />
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivTopSong"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="8dp"
+                        android:scaleType="centerCrop"
+                        tools:src="@drawable/placeholder_album"
+                        app:shapeAppearanceOverlay="@style/RoundedImageView" />
+
+                    <ImageView
+                        android:id="@+id/MoreTopSong"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="end"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/gray" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

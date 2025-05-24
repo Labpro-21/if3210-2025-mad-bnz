@@ -7,7 +7,7 @@
     android:background="@drawable/gradient_background_dark">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar"
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
@@ -16,25 +16,29 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:paddingVertical="8dp">
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent">
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
+                <!-- App Logo and Name -->
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <ImageView
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:src="@mipmap/ic_logo" />
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivAppLogo"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        app:shapeAppearanceOverlay="@style/CircleImageView"
+                        android:src="@mipmap/ic_purrytify_logo_round"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -46,24 +50,21 @@
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/iv_profile"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
+                <!-- Profile Image -->
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivProfile"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:layout_marginEnd="16dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    tools:src="@drawable/ic_profile" />
-            </RelativeLayout>
+                    android:src="@drawable/profile_placeholder"
+                    app:shapeAppearanceOverlay="@style/CircleImageView" />
+            </LinearLayout>
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="80dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -71,173 +72,193 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Welcome card -->
-            <RelativeLayout
-                android:layout_width="match_parent"
+            <!-- Top Charts Section -->
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="8dp">
+                android:text="Charts"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_margin="16dp"/>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:text="Charts"
-                    android:textColor="@color/white"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-
-            </RelativeLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="16dp">
+                android:padding="8dp">
 
+                <!-- Global Top 50 -->
                 <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/card_global_charts"
+                    android:id="@+id/cardGlobalChart"
                     android:layout_width="0dp"
-                    android:layout_height="120dp"
+                    android:layout_height="140dp"
                     android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    app:cardBackgroundColor="@color/teal_700"
+                    android:layout_margin="8dp"
                     app:cardCornerRadius="8dp"
-                    app:cardElevation="4dp"
-                    android:clickable="true"
-                    android:focusable="true">
+                    app:cardBackgroundColor="#1E3264">
 
-                    <RelativeLayout
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:orientation="vertical"
                         android:padding="16dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Top 50\nGlobal"
+                            android:text="Top 50"
                             android:textColor="@color/white"
                             android:textSize="20sp"
                             android:textStyle="bold"/>
 
-                        <ImageView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_alignParentBottom="true"
-                            android:src="@drawable/ic_globe"/>
-                    </RelativeLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="GLOBAL"
+                            android:textColor="#B3FFFFFF"
+                            android:textSize="14sp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Your daily update of\nthe most played tracks"
+                            android:textColor="#B3FFFFFF"
+                            android:textSize="12sp"/>
+                    </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+                <!-- Country Top 50 -->
                 <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/card_country_charts"
+                    android:id="@+id/cardCountryChart"
                     android:layout_width="0dp"
-                    android:layout_height="120dp"
+                    android:layout_height="140dp"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    app:cardBackgroundColor="#333333"
+                    android:layout_margin="8dp"
                     app:cardCornerRadius="8dp"
-                    app:cardElevation="4dp"
-                    android:clickable="true"
-                    android:focusable="true">
+                    app:cardBackgroundColor="#E61E32">
 
-                    <RelativeLayout
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:orientation="vertical"
                         android:padding="16dp">
 
                         <TextView
-                            android:id="@+id/tv_country_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Top 10\nCountry"
+                            android:text="Top 50"
                             android:textColor="@color/white"
                             android:textSize="20sp"
                             android:textStyle="bold"/>
 
-                        <ImageView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_alignParentBottom="true"
-                            android:src="@drawable/ic_location"/>
-                    </RelativeLayout>
+                        <TextView
+                            android:id="@+id/tvCountryName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#B3FFFFFF"
+                            android:textSize="14sp"
+                            tools:text="INDONESIA"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Your daily update of\nthe most played tracks"
+                            android:textColor="#B3FFFFFF"
+                            android:textSize="12sp"/>
+                    </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-
-
-
+            <!-- New Songs Section -->
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
+                android:text="New songs"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_margin="16dp"/>
+
+
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvNewSongs"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:orientation="horizontal"
+                        android:visibility="gone"/>
+
+                    <include
+                        android:id="@+id/layoutNewSongsEmpty"
+                        layout="@layout/layout_empty_songs"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"/>
+                </FrameLayout>
+
+
+            <!-- Recently Played Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Recently played"
                 android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_margin="16dp"/>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_recently_played"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:orientation="horizontal"
-                android:paddingHorizontal="8dp"
-                android:paddingBottom="16dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="5"
-                tools:listitem="@layout/item_song_grid" />
+                android:layout_height="wrap_content">
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvRecentlyPlayed"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="true"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:paddingHorizontal="16dp"/>
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="8dp">
+                <include
+                    android:id="@+id/layoutRecentlyPlayedEmpty"
+                    layout="@layout/layout_empty_songs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"/>
+            </FrameLayout>
+
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:text="New releases"
+                android:text="For you"
                 android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_margin="16dp"/>
 
-        </RelativeLayout>
-
-
-            <androidx.core.widget.NestedScrollView
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvRecommended"
                 android:layout_width="match_parent"
-                android:layout_height="303dp"
-                android:fillViewport="true"
-                android:overScrollMode="always">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_new_songs"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:clipToPadding="false"
-                    android:orientation="vertical"
-                    android:paddingHorizontal="8dp"
-                    android:paddingBottom="16dp"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:itemCount="5"
-                    tools:listitem="@layout/item_song" />
-
-            </androidx.core.widget.NestedScrollView>
-
-
-
-
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:paddingBottom="80dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_playlist"/>
 
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
 
     <!-- Loading View -->

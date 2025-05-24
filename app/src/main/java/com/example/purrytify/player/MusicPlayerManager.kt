@@ -8,11 +8,15 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import android.media.AudioAttributes
+import android.os.Build
+import androidx.lifecycle.LifecycleOwner
 import com.example.purrytify.auth.TokenManager
+import com.example.purrytify.model.PlaylistRecommendation
 import com.example.purrytify.model.Song
 import com.example.purrytify.repository.AnalyticsRepository
 import com.example.purrytify.repository.OnlineSongRepository
 import com.example.purrytify.repository.SongRepository
+import com.example.purrytify.service.NotificationService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -89,6 +93,21 @@ class MusicPlayerManager @Inject constructor(
 
     private var retryCount = 0
     private val MAX_RETRY_ATTEMPTS = 3
+
+
+    private var currentRecommendedPlaylist: PlaylistRecommendation? = null
+    private var notificationService: NotificationService? = null
+
+    fun playRecommendedPlaylist(playlist: PlaylistRecommendation, startSongIndex: Int = 0) {
+        currentRecommendedPlaylist = playlist
+        val songs = playlist.songs
+
+        if (songs.isNotEmpty() && startSongIndex < songs.size) {
+            _currentPlaylist.postValue(songs)
+            playSong(songs[startSongIndex])
+        }
+    }
+
 
     private fun getCurrentUserId(): String {
         return tokenManager.getUserId() ?: throw IllegalStateException("User not logged in")
@@ -178,12 +197,12 @@ class MusicPlayerManager @Inject constructor(
                         }
 
                         if (song.isLocal || song.isDownloaded) {
-                            val file = File(song.path)
-                            if (file.exists()) {
-                                setDataSource(context, Uri.parse(song.path))
-                            } else {
-                                throw IOException("Local file not found")
-                            }
+//                            val file = File(song.path)
+//                            if (file.exists()) {
+                            setDataSource(context, Uri.parse(song.path))
+//                            } else {
+//                                throw IOException("Local file not found")
+//                            }
                         } else {
                             setDataSource(song.path)
                         }
@@ -225,6 +244,18 @@ class MusicPlayerManager @Inject constructor(
                         throw e
                     }
                 }
+
+                // Start notification service
+                startNotificationService(song)
+
+                // Update notification
+                notificationService?.updatePlayerNotification(song, _isPlaying.value == true)
+
+                // Observe playing state changes for notification
+                _isPlaying.observeForever { isPlaying ->
+                    notificationService?.updatePlayerNotification(song, isPlaying)
+                }
+
             } catch (e: Exception) {
                 Log.e("MusicPlayerManager", "Error playing song: ${song.title}", e)
                 isPreparing = false
@@ -237,13 +268,25 @@ class MusicPlayerManager @Inject constructor(
         }
     }
 
+    private fun startNotificationService(song: Song) {
+        val serviceIntent = Intent(context, NotificationService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(serviceIntent)
+        } else {
+            context.startService(serviceIntent)
+        }
+    }
+
     private suspend fun updateCurrentPlaylist() {
         try {
-            val songs = when (currentPlaylistSource) {
-                PlaylistSource.OFFLINE -> songRepository.getOfflineSongs()
-                PlaylistSource.GLOBAL_TOP -> songRepository.getGlobalTopSongs()
-                PlaylistSource.COUNTRY_TOP -> songRepository.getCountryTopSongs()
-            }.first()
+            val songs = when {
+                currentRecommendedPlaylist != null -> currentRecommendedPlaylist?.songs ?: emptyList()
+                else -> when (currentPlaylistSource) {
+                    PlaylistSource.OFFLINE -> songRepository.getOfflineSongs()
+                    PlaylistSource.GLOBAL_TOP -> songRepository.getGlobalTopSongs()
+                    PlaylistSource.COUNTRY_TOP -> songRepository.getCountryTopSongs()
+                }.first()
+            }
 
             Log.d("MusicPlayerManager", "Updating playlist - Source: $currentPlaylistSource, Size: ${songs.size}")
 
@@ -443,9 +486,6 @@ class MusicPlayerManager @Inject constructor(
         }
     }
 
-    fun cleanup() {
-        stopPositionUpdates()
-    }
 
 
     fun release() {
@@ -471,11 +511,12 @@ class MusicPlayerManager @Inject constructor(
             0
         }
     }
-//    override fun onCleared() {
-//        super.onCleared()
-//        releaseMediaPlayer()
-//        viewModelScope.cancel()
-//    }
+    fun cleanup() {
+        notificationService?.stopSelf()
+        releaseMediaPlayer()
+        stopPositionUpdates()
+        viewModelScope.cancel()
+    }
 
 
 }

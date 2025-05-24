@@ -3,6 +3,8 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
     id("dagger.hilt.android.plugin")
+    id("kotlin-parcelize")  // Add this line
+
 
 
 }
@@ -48,6 +50,18 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
+        dataBinding = true
+    }
+
+    kotlin {
+        sourceSets {
+            all {
+                languageSettings {
+                    optIn("kotlin.RequiresOptIn")
+                }
+            }
+        }
     }
     kapt {
         arguments {
@@ -122,4 +136,6 @@ dependencies {
     // DateTime
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+
+    implementation("com.opencsv:opencsv:5.7.1")
 }

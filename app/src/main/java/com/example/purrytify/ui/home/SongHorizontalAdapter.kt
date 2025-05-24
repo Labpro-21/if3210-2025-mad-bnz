@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.purrytify.R
 import com.example.purrytify.databinding.ItemSongHorizontalBinding
 import com.example.purrytify.model.Song
@@ -65,6 +66,7 @@ class SongHorizontalAdapter(
                 .load(song.coverUrl.takeIf { !it.isNullOrEmpty() })
                 .placeholder(R.drawable.placeholder_album)
                 .error(R.drawable.placeholder_album)
+                .transform(RoundedCorners(8))
                 .centerCrop()
                 .into(binding.ivAlbum)
         }

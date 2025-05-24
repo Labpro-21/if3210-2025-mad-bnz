@@ -1,15 +1,18 @@
 package com.example.purrytify.ui.charts
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.purrytify.R
 import com.example.purrytify.auth.TokenManager
@@ -61,22 +64,6 @@ class ChartsFragment : Fragment() {
 
         setupObservers()
         viewModel.loadCharts(chartType)
-        // Observe download status
-//        viewModel.downloadStatus.observe(viewLifecycleOwner) { status ->
-//            when (status) {
-//                is DownloadStatus.Success -> {
-//                    Toast.makeText(context, "Download completed", Toast.LENGTH_SHORT).show()
-//                }
-//                is DownloadStatus.Error -> {
-//                    Toast.makeText(context, "Download failed: ${status.message}", Toast.LENGTH_SHORT).show()
-//                }
-//                is DownloadStatus.Progress -> {
-//                    // Progress is handled by the adapter
-//                }
-//
-//
-//            }
-//        }
     }
     private fun setupUI(chartType: String) {
         binding.apply {
@@ -89,7 +76,12 @@ class ChartsFragment : Fragment() {
                 }
                 else -> {
                     tvChartTitle.text = "Top 10"
+                    Log.e("Fragment CHart",chartType)
+//                    if (!CountryUtils.isCountrySupported(chartType)) {
+//                        throw IllegalArgumentException("Unsupported country code: $chartType")
+//                    }
                     tvChartSubtitle.text = CountryUtils.getCountryName(chartType)
+//                    tvChartSubtitle.text = (chartType)
                 }
             }
 
@@ -104,6 +96,13 @@ class ChartsFragment : Fragment() {
             adapter = songAdapter
             layoutManager = LinearLayoutManager(context)
             setHasFixedSize(true)
+            
+            // Add divider
+            val divider = DividerItemDecoration(context, LinearLayoutManager.VERTICAL)
+            ContextCompat.getDrawable(requireContext(), R.drawable.list_divider)?.let {
+                divider.setDrawable(it)
+            }
+            addItemDecoration(divider)
         }
     }
 

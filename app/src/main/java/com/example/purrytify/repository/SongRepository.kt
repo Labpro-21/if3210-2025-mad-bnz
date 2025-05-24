@@ -16,6 +16,7 @@ import java.net.URL
 import java.nio.file.Files.exists
 import javax.inject.Inject
 import android.content.Context
+import com.example.purrytify.utils.CountryUtils
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Singleton
@@ -37,7 +38,7 @@ class SongRepository @Inject constructor(
 
     fun getGlobalTopSongs(): Flow<List<Song>> = songDao.getGlobalTopSongs()
 
-
+//    val countries = CountryUtils.getCountryCode(tokenManager.getUserCountry().toString())
     fun getCountryTopSongs(): Flow<List<Song>> = songDao.getCountryTopSongs(tokenManager.getUserCountry().toString())
     fun getDownloadedSongs(): Flow<List<Song>> = songDao.getDownloadedSongs()
 
@@ -61,9 +62,9 @@ class SongRepository @Inject constructor(
         }
     }
 
-    suspend fun addLocalSong(song: Song): Long {
+    suspend fun addLocalSong(song: Song): Long? {
         return withContext(Dispatchers.IO) {
-            songDao.insertSong(song)
+            songDao.insertOfflineSong(song)
         }
     }
 
@@ -146,11 +147,12 @@ class SongRepository @Inject constructor(
                 createdAt = System.currentTimeMillis(),
                 updatedAt = System.currentTimeMillis(),
                 coverUrl = if (artworkFile.exists()) artworkFile.absolutePath else song.coverUrl,
-                isDownloaded = true
+                isDownloaded = true,
+                isLocal = true,
             )
 
             // Save to database
-            songDao.insertSong(downloadedSong)
+            songDao.insertDownloadedSong(downloadedSong)
             emit(100) // Final progress
 
         } catch (e: Exception) {

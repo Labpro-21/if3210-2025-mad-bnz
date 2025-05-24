@@ -34,14 +34,21 @@
                 android:layout_height="200dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="24dp"
-                app:cardCornerRadius="8dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="8dp">
 
                 <ImageView
                     android:id="@+id/ivChartCover"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:scaleType="centerCrop"/>
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_chart_cover"/>
+
+                <!-- Add subtle overlay for depth -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/gradient_overlay"/>
             </com.google.android.material.card.MaterialCardView>
 
             <!-- Chart Info -->
@@ -72,7 +79,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="24dp"
                 android:gravity="center"
-                android:text="Your daily update of the most played tracks right now - Global"
+                android:text="Your daily update of the most played tracks right now"
                 android:textColor="#CCFFFFFF"
                 android:textSize="14sp"/>
 

@@ -18,6 +18,7 @@
         android:padding="16dp">
 
         <com.google.android.material.imageview.ShapeableImageView
+            app:cornerRadius="8dp"
             android:id="@+id/ivTopSong"
             android:layout_width="300dp"
             android:layout_height="300dp"
@@ -25,7 +26,7 @@
             android:layout_gravity="center_horizontal"
             tools:src="@drawable/placeholder_album"
             android:layout_marginBottom="20dp"
-            app:cornerRadius="8dp"/>
+            />
 
 
         <TextView

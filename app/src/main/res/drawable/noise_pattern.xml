@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,0h200v200h-200z"
+        android:fillAlpha="0.05"/>
+    <!-- Add random dots for noise effect -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,0 L1,1 M40,35 L41,36 M80,120 L81,121 M160,80 L161,81 M120,160 L121,161"
+        android:strokeWidth="0.5"
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.1"/>
+</vector>

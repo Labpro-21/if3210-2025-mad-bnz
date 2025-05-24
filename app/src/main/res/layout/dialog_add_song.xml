@@ -99,12 +99,6 @@
         app:boxStrokeColor="@color/spotify_green"
         app:hintTextColor="@color/spotify_green">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etAudioUrl"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:textColor="@color/white" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -117,12 +111,7 @@
         app:boxStrokeColor="@color/spotify_green"
         app:hintTextColor="@color/spotify_green">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etAlbumArtUrl"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:textColor="@color/white" />
+
     </com.google.android.material.textfield.TextInputLayout>
 
 

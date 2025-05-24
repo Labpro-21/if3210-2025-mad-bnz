@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.catch
 import android.util.Log
 import com.example.purrytify.model.Song
 import com.example.purrytify.repository.SongRepository
+import com.example.purrytify.utils.CountryUtils
 import javax.inject.Inject
 
 @HiltViewModel
@@ -61,19 +62,63 @@ class ChartsViewModel @Inject constructor(
         }
     }
 
+//    fun loadCharts(type: String) {
+//        viewModelScope.launch {
+//            _isLoading.value = true
+//            try {
+//                when (type) {
+//                    "global" -> {
+//                        songRepository.getGlobalTopSongs()
+//                            .catch { e ->
+//                                _error.value = e.message ?: "Failed to load global songs"
+//                                _songs.value = emptyList()
+//                            }
+//                            .collect { songs ->
+//                                _songs.value = songs
+//                            }
+//                    }
+//                    else -> {
+//                        songRepository.getCountryTopSongs()
+//                            .collect { songs ->
+//                                _songs.value = songs
+//                            }
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                _error.value = e.message ?: "Failed to load songs"
+//                _songs.value = emptyList()
+//            } finally {
+//                _isLoading.value = false
+//            }
+//        }
+//    }
+
     fun loadCharts(type: String) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                when (type) {
-                    "global" -> {
+                when (type.uppercase()) {
+                    "GLOBAL" -> {
                         songRepository.getGlobalTopSongs()
+                            .catch { e ->
+                                _error.value = e.message ?: "Failed to load global songs"
+                                _songs.value = emptyList()
+                            }
                             .collect { songs ->
                                 _songs.value = songs
                             }
                     }
                     else -> {
+                        // Validate country code
+//                        if (!CountryUtils.isCountrySupported(type)) {
+//                            throw IllegalArgumentException("Unsupported country code: $type")
+//                        }
+
                         songRepository.getCountryTopSongs()
+                            .catch { e ->
+                                _error.value = e.message ?: "Failed to load country songs"
+                                _songs.value = emptyList()
+                            }
                             .collect { songs ->
                                 _songs.value = songs
                             }

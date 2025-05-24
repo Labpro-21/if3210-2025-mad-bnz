@@ -13,9 +13,11 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.purrytify.R
@@ -25,6 +27,7 @@ import com.example.purrytify.model.Song
 import com.example.purrytify.ui.common.BaseFragment
 import com.example.purrytify.utils.FilePickerHelper
 import com.example.purrytify.utils.ImagePickerHelper
+import com.example.purrytify.utils.MediaHelper
 import com.example.purrytify.utils.showToast
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.UUID
@@ -110,6 +113,13 @@ class LibraryFragment : BaseFragment() {
         binding.rvSongs.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = songAdapter
+        }
+        binding.rvSongs.apply {
+            val divider = DividerItemDecoration(context, LinearLayoutManager.VERTICAL)
+            ContextCompat.getDrawable(requireContext(), R.drawable.list_divider)?.let {
+                divider.setDrawable(it)
+            }
+            addItemDecoration(divider)
         }
     }
 
@@ -212,18 +222,21 @@ class LibraryFragment : BaseFragment() {
 
         selectedAudioUri = null
         selectedImageUri = null
+        var songDuration: Long = 0 // Add variable to store duration
 
         val originalCallback = filePickerHelper.getCallback()
 
         dialogBinding.btnSelectAudio.setOnClickListener {
             filePickerHelper.setCallback { song ->
+
+
                 selectedAudioUri = Uri.parse(song.path)
+
                 dialogBinding.etTitle.setText(song.title)
                 dialogBinding.etArtist.setText(song.artist)
-                dialogBinding.etAudioUrl.setText(song.path)
+                songDuration = song.duration // Store the song duration
 
                 if (song.coverUrl.toString().isNotEmpty()) {
-                    dialogBinding.etAlbumArtUrl.setText(song.coverUrl)
                     selectedImageUri = Uri.parse(song.coverUrl)
                     Glide.with(requireContext())
                         .load(selectedImageUri)
@@ -242,7 +255,7 @@ class LibraryFragment : BaseFragment() {
 
             imagePickerHelper.setCallback { uri ->
                 selectedImageUri = uri
-                dialogBinding.etAlbumArtUrl.setText(uri.toString())
+
                 Glide.with(requireContext())
                     .load(uri)
                     .placeholder(R.drawable.ic_music_note)
@@ -254,17 +267,25 @@ class LibraryFragment : BaseFragment() {
         dialogBinding.btnAdd.setOnClickListener {
             val title = dialogBinding.etTitle.text.toString().trim()
             val artist = dialogBinding.etArtist.text.toString().trim()
-            val audioUrl = selectedAudioUri?.toString() ?: dialogBinding.etAudioUrl.text.toString().trim()
-            val albumArtUrl = selectedImageUri?.toString() ?: dialogBinding.etAlbumArtUrl.text.toString().trim()
+            val audioUrl = selectedAudioUri.toString()
+            val albumArtUrl = selectedImageUri?.toString()
 
             if (title.isNotEmpty() && artist.isNotEmpty() && audioUrl.isNotEmpty()) {
+                // Get duration from MediaMetadataRetriever if not already set
+                if (songDuration == 0L) {
+                    songDuration = selectedAudioUri?.let { uri ->
+                        MediaHelper.getAudioDuration(requireContext(), uri)
+                    } ?: 0L
+                }
+
                 val newSong = Song(
                     id = UUID.randomUUID().toString(),
                     title = title,
                     artist = artist,
                     path = audioUrl,
                     coverUrl = albumArtUrl,
-                    duration = 0,
+                    duration = songDuration, // Use the actual duration
+                    isDownloaded = false,
                     isLiked = false,
                     lastPlayed = 0,
                     isLocal = true,

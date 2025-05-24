@@ -1,5 +1,6 @@
 package com.example.purrytify.ui.library
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -51,6 +52,7 @@ class LibraryViewModel @Inject constructor(
         viewModelScope.launch {
             when (tabIndex) {
                 0 -> songRepository.getOfflineSongs().collectLatest { songs ->
+                    Log.e("LIBRAryViewModel", "Songs: $songs")
                     _songs.value = applySortAndFilter(songs)
                 }
                 1 -> songRepository.getLikedSongs().collectLatest { songs ->

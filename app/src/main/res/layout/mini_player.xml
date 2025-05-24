@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/miniPlayerLayout"
@@ -8,102 +9,96 @@
     android:background="@drawable/mini_player_gradient"
     android:clickable="true"
     android:focusable="true"
-    android:elevation="12dp"
+    android:elevation="8dp"
+    android:foreground="?attr/selectableItemBackground"
     android:visibility="gone"
-    tools:visibility="visible"
-    >
+    tools:visibility="visible">
 
-    <ImageView
+    <!-- Album Art -->
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/miniPlayerCover"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="12dp"
         android:scaleType="centerCrop"
-        android:background="@drawable/round_corners"
-        android:elevation="2dp"
-
-        android:adjustViewBounds="true"
-        android:cropToPadding="true"
-        android:padding="0dp"
-
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:src="@drawable/placeholder_album" />
+        app:shapeAppearanceOverlay="@style/RoundedImageView"
+        tools:src="@drawable/placeholder_album"/>
 
-    <TextView
-        android:id="@+id/miniPlayerTitle"
+    <!-- Song Info Container -->
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
-        android:layout_marginEnd="16dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:letterSpacing="-0.01"
-        app:layout_constraintBottom_toTopOf="@+id/miniPlayerArtist"
-        app:layout_constraintEnd_toStartOf="@+id/minibtnPlayPause"
-        app:layout_constraintStart_toEndOf="@+id/miniPlayerCover"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed"
-        tools:text="Blinding Lights" />
-
-    <TextView
-        android:id="@+id/miniPlayerArtist"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textColor="#B3FFFFFF"
-        android:textSize="14sp"
-        android:alpha="0.8"
-        app:layout_constraintBottom_toTopOf="@+id/miniPlayerProgress"
-        app:layout_constraintEnd_toEndOf="@+id/miniPlayerTitle"
-        app:layout_constraintStart_toStartOf="@+id/miniPlayerTitle"
-        app:layout_constraintTop_toBottomOf="@+id/miniPlayerTitle"
-        tools:text="The Weeknd" />
-
-
-    <ImageButton
-        android:id="@+id/minibtnPlayPause"
-        android:layout_width="40dp"
-        android:layout_height="36dp"
         android:layout_marginEnd="12dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Play/Pause"
-        android:src="@drawable/ic_play"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/minibtnNext"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/white" />
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/miniPlayerProgress"
+        app:layout_constraintEnd_toStartOf="@id/controlsContainer"
+        app:layout_constraintStart_toEndOf="@id/miniPlayerCover"
+        app:layout_constraintTop_toTopOf="parent">
 
+        <TextView
+            android:id="@+id/miniPlayerTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="Song Title"/>
 
-    <ImageButton
-        android:id="@+id/minibtnNext"
-        android:layout_width="40dp"
-        android:layout_height="36dp"
-        android:layout_marginEnd="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Next Song"
-        android:src="@drawable/ic_skip_next"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/white" />
+        <TextView
+            android:id="@+id/miniPlayerArtist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#B3FFFFFF"
+            android:textSize="12sp"
+            tools:text="Artist Name"/>
+    </LinearLayout>
+
+    <!-- Controls Container -->
+    <LinearLayout
+        android:id="@+id/controlsContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageButton
+            android:id="@+id/minibtnPlayPause"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_play"
+            app:tint="@color/white"/>
+
+        <ImageButton
+            android:id="@+id/minibtnNext"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="12dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_skip_next"
+            app:tint="@color/white"/>
+    </LinearLayout>
+
+    <!-- Progress Bar -->
     <ProgressBar
         android:id="@+id/miniPlayerProgress"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:progressTint="#1DB954"
+        android:progressTint="@color/spotify_green"
         android:progressBackgroundTint="#4D4D4D"
-        android:layout_marginTop="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

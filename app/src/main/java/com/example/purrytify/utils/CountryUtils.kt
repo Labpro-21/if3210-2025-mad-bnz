@@ -43,4 +43,17 @@ object CountryUtils {
     fun getAllCountries(): List<Pair<String, String>> {
         return supportedCountries.toList()
     }
+
+    /**
+     * Convert country name to country code
+     * @param name Full country name
+     * @return ISO 3166-1 alpha-2 country code or null if country is not supported
+     */
+    fun getCountryCode(name: String): String? {
+        return supportedCountries.entries.firstOrNull {
+            it.value.equals(name, ignoreCase = true)
+        }?.key
+    }
+
+
 }

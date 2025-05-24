@@ -51,6 +51,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import kotlin.math.log
 
 
 @AndroidEntryPoint
@@ -171,7 +172,7 @@ class EditProfileFragment : Fragment() {
 
 
     private fun saveChanges() {
-        val location = binding.tvLocation.text.toString()
+        val location = CountryUtils.getCountryCode(binding.tvLocation.text.toString()).toString()
 
         viewModel.updateProfile(
             location = location.takeIf { it.isNotBlank() },
@@ -303,18 +304,39 @@ class EditProfileFragment : Fragment() {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+//    private fun getCurrentLocation() {
+//        if (hasLocationPermission()) {
+//            fusedLocationClient.lastLocation
+//                .addOnSuccessListener { location ->
+//                    location?.let {
+//                        lifecycleScope.launch(Dispatchers.IO) {
+//
+//                            getAddressFromLocation(it)
+//                        }
+//                    } ?: showLocationError("Couldn't get current location")
+//                }
+//                .addOnFailureListener {
+//                    showLocationError("Error getting location: ${it.message}")
+//                }
+//        }
+//    }
+
     private fun getCurrentLocation() {
         if (hasLocationPermission()) {
+
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location ->
+
                     location?.let {
-                        lifecycleScope.launch(Dispatchers.IO) {
+                        // This location is the current device location
+                        lifecycleScope.launch {
                             getAddressFromLocation(it)
                         }
-                    } ?: showLocationError("Couldn't get current location")
+                    } ?: showLocationError("Couldn't get current location. Please try again.")
                 }
-                .addOnFailureListener {
-                    showLocationError("Error getting location: ${it.message}")
+                .addOnFailureListener { e ->
+
+                    showLocationError("Error getting location: ${e.message}")
                 }
         }
     }
@@ -376,8 +398,9 @@ class EditProfileFragment : Fragment() {
             withContext(Dispatchers.Main) {
                 addresses?.firstOrNull()?.let { address ->
                     val countryCode = address.countryCode
+                    Log.e("Check country",countryCode)
                     if (CountryUtils.isCountrySupported(countryCode)) {
-                        binding.tvLocation.text = countryCode
+                        binding.tvLocation.text = CountryUtils.getCountryName(countryCode)
                     } else {
                         showLocationError("Location not supported: $countryCode")
                     }

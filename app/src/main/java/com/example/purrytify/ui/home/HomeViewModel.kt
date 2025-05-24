@@ -7,11 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.purrytify.auth.TokenManager
 import com.example.purrytify.model.ApiResponse
+import com.example.purrytify.model.PlaylistRecommendation
 import com.example.purrytify.model.Song
 import com.example.purrytify.model.User
 import com.example.purrytify.player.MusicPlayerManager
 import com.example.purrytify.repository.SongRepository
 import com.example.purrytify.repository.OnlineSongRepository
+import com.example.purrytify.repository.RecommendationRepository
 import com.example.purrytify.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
@@ -24,7 +26,8 @@ class HomeViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val onlineSongRepository: OnlineSongRepository,
     private val musicPlayerManager: MusicPlayerManager,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val recommendationRepository: RecommendationRepository,
 ) : ViewModel() {
 
     private val _userInfo = MutableLiveData<User?>()
@@ -41,11 +44,28 @@ class HomeViewModel @Inject constructor(
 
     private val _globalTopSongs = MutableLiveData<List<Song>>()
     private val _countryTopSongs = MutableLiveData<List<Song>>()
+    private val _recommendedPlaylists = MutableLiveData<List<PlaylistRecommendation>>()
+    val recommendedPlaylists: LiveData<List<PlaylistRecommendation>> = _recommendedPlaylists
+
 
     init {
         loadUserInfo()
         loadRecentlyPlayedSongs()
         loadNewReleases()
+        loadRecommendations()
+    }
+
+    private fun loadRecommendations() {
+        viewModelScope.launch {
+            try {
+                recommendationRepository.getDailyRecommendations()
+                    .collect { playlists ->
+                        _recommendedPlaylists.value = playlists
+                    }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error loading recommendations", e)
+            }
+        }
     }
 
     private fun loadUserInfo() {
@@ -69,7 +89,7 @@ class HomeViewModel @Inject constructor(
 
                 songRepository.getAllSongs().collect { songs ->
                     _recentlyPlayedSongs.value = songs.sortedByDescending { it.lastPlayed }
-                        .take(10)
+                        .take(40)
                 }
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error loading recent songs", e)
@@ -83,7 +103,7 @@ class HomeViewModel @Inject constructor(
 
                 songRepository.getRecentlyAddedSongs().collect { songs ->
                     _newReleaseSongs.value = songs.sortedByDescending { it.id }
-                        .take(10)
+
                 }
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error loading new releases", e)

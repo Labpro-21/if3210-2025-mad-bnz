@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.example.purrytify.model.Song
 import kotlinx.coroutines.flow.Flow
@@ -12,6 +13,41 @@ import kotlinx.coroutines.flow.Flow
 interface SongDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSong(song: Song): Long  // Return inserted row ID
+
+//    @Insert(onConflict = OnConflictStrategy.REPLACE)
+//    suspend fun insertOfflineSong(song: Song): Long {
+//        return insertSong(song.copy(isLocal = true))
+//    }
+
+//    @Insert(onConflict = OnConflictStrategy.REPLACE)
+//    suspend fun insertDownloadedSong(song: Song): Long {
+//        return insertSong(song.copy(isDownloaded = true))
+//    }
+
+    @Query("SELECT * FROM songs WHERE title = :title AND artist = :artist AND (isLocal = 1 OR isDownloaded = 1) LIMIT 1")
+    suspend fun checkDuplicateOfflineSong(title: String, artist: String): Song?
+
+
+    @Transaction
+    suspend fun insertDownloadedSong(song: Song): Long? {
+        val existingSong = checkDuplicateOfflineSong(song.title, song.artist)
+        return if (existingSong != null) {
+            null
+        } else {
+            insertSong(song.copy(isDownloaded = true))
+        }
+    }
+
+
+    @Transaction
+    suspend fun insertOfflineSong(song: Song): Long? {
+        val existingSong = checkDuplicateOfflineSong(song.title, song.artist)
+        return if (existingSong != null) {
+            null
+        } else {
+            insertSong(song.copy(isLocal = true))
+        }
+    }
 
     @Update
     suspend fun updateSong(song: Song): Int  // Return number of rows updated
@@ -22,10 +58,10 @@ interface SongDao {
     @Query("SELECT * FROM songs WHERE isLiked = 1 ORDER BY createdAt DESC")
     fun getLikedSongs(): Flow<List<Song>>
 
-    @Query("SELECT * FROM songs ORDER BY lastPlayed DESC LIMIT 10")
+    @Query("SELECT * FROM songs ORDER BY lastPlayed DESC LIMIT 5")
     fun getRecentlyPlayed(): Flow<List<Song>>
 
-    @Query("SELECT * FROM songs ORDER BY createdAt DESC LIMIT 10")
+    @Query("SELECT * FROM songs ORDER BY createdAt DESC ")
     fun getNewSongs(): Flow<List<Song>>
 
     @Query("UPDATE songs SET lastPlayed = :timestamp WHERE id = :songId")

@@ -92,7 +92,22 @@ abstract class BaseFragment : Fragment() {
                                     }
                                 }
                                 root.setOnClickListener {
-                                    findNavController().navigate(R.id.playerFragment)
+                                    // Add pre-animation setup
+                                    it.animate()
+                                        .setDuration(150)
+                                        .scaleX(0.95f)
+                                        .scaleY(0.95f)
+                                        .withEndAction {
+                                            it.animate()
+                                                .setDuration(100)
+                                                .scaleX(1f)
+                                                .scaleY(1f)
+                                                .withEndAction {
+                                                    // Navigate with animation
+                                                    findNavController().navigate(R.id.action_global_playerFragment)
+                                                }
+                                        }
+                                        .start()
                                 }
 
                                 minibtnPlayPause.setOnClickListener {

@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import com.example.purrytify.model.DailyListening
 import com.example.purrytify.model.PlayHistoryEntity
-import com.example.purrytify.model.analytics.SongPlayCount
 import com.example.purrytify.model.analytics.TopArtistStats
 import com.example.purrytify.model.analytics.TopSongStats
 import kotlinx.coroutines.flow.Flow

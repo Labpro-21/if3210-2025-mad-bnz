@@ -88,6 +88,8 @@ class FilePickerHelper(private val fragment: Fragment, private var onSongImporte
                 albumArtFile.writeBytes(albumArt)
                 albumArtPath = albumArtFile.absolutePath
             }
+            val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
+
 
 
             fragment.requireContext().contentResolver.takePersistableUriPermission(
@@ -102,8 +104,10 @@ class FilePickerHelper(private val fragment: Fragment, private var onSongImporte
                 path = uri.toString(),
                 coverUrl = albumArtPath,
                 isLiked = false,
+                isDownloaded = false,
+                isLocal = true,
                 createdAt = System.currentTimeMillis(),
-                duration = 0,
+                duration = duration,
                 lastPlayed = 0
             )
         } finally {
