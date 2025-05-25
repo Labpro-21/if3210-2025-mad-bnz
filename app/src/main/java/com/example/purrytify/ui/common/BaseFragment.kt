@@ -1,6 +1,7 @@
 package com.example.purrytify.ui.common
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ViewFlipper
 import androidx.fragment.app.Fragment
@@ -16,6 +17,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 abstract class BaseFragment : Fragment() {
+    private val TAG = "BaseFragment"
 
     @Inject
     lateinit var musicPlayerManager: MusicPlayerManager
@@ -27,7 +29,9 @@ abstract class BaseFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "onViewCreated: Starting base fragment setup")
         view.post {
+            Log.d(TAG, "onViewCreated: Post-layout setup of mini player")
             setupMiniPlayer(view)
         }
         viewFlipper = view.findViewById(R.id.viewFlipper)
@@ -71,14 +75,37 @@ abstract class BaseFragment : Fragment() {
 
     private fun setupMiniPlayer(rootView: View) {
         try {
+            Log.d(TAG, "setupMiniPlayer: Starting mini player setup")
             val miniPlayerView = rootView.findViewById<View>(R.id.miniPlayerLayout)
+            Log.d(TAG, "setupMiniPlayer: MiniPlayerView found: ${miniPlayerView != null}")
+            
             if (miniPlayerView != null) {
                 miniPlayer = MiniPlayerBinding.bind(miniPlayerView)
+                Log.d(TAG, "setupMiniPlayer: Mini player binding successful")
+                
+                // First, set initial visibility to GONE
+                miniPlayer?.miniPlayerLayout?.visibility = View.GONE
+                Log.d(TAG, "setupMiniPlayer: Set initial visibility to GONE")
+
                 musicPlayerManager.currentSong.observe(viewLifecycleOwner) { song ->
+                    Log.d(TAG, "setupMiniPlayer: Current song changed: ${song?.title}")
                     if (song != null) {
                         lifecycleScope.launch {
                             miniPlayer?.apply {
-                                miniPlayerLayout.visibility = View.VISIBLE
+                                Log.d(TAG, "setupMiniPlayer: Updating mini player UI")
+                                
+                                // Check player fragment visibility before showing
+                                val isPlayerVisible = musicPlayerManager.isPlayerFragmentVisible.value
+                                Log.d(TAG, "setupMiniPlayer: Player fragment visible: $isPlayerVisible")
+                                
+                                miniPlayerLayout.visibility = if (isPlayerVisible) {
+                                    Log.d(TAG, "setupMiniPlayer: Hiding mini player - player fragment visible")
+                                    View.GONE
+                                } else {
+                                    Log.d(TAG, "setupMiniPlayer: Showing mini player - has song and player not visible")
+                                    View.VISIBLE
+                                }
+                                
                                 miniPlayerTitle.text = song.title
                                 miniPlayerArtist.text = song.artist
                                 withContext(Dispatchers.IO) {
@@ -115,16 +142,36 @@ abstract class BaseFragment : Fragment() {
                                 }
                             }
                         }
+
                     } else {
+                        Log.d(TAG, "setupMiniPlayer: No song, hiding mini player")
                         miniPlayer?.miniPlayerLayout?.visibility = View.GONE
                     }
                 }
-                musicPlayerManager.isPlaying.observe(viewLifecycleOwner) { isPlaying ->
-                    updatePlayPauseButton(isPlaying)
+
+                // Add visibility state observer
+                lifecycleScope.launch {
+                    musicPlayerManager.isPlayerFragmentVisible.collect { isVisible ->
+                        Log.d(TAG, "setupMiniPlayer: Player visibility changed: $isVisible")
+                        miniPlayer?.miniPlayerLayout?.visibility = when {
+                            isVisible -> {
+                                Log.d(TAG, "setupMiniPlayer: Hiding mini player - player visible")
+                                View.GONE
+                            }
+                            musicPlayerManager.currentSong.value != null -> {
+                                Log.d(TAG, "setupMiniPlayer: Showing mini player - has song")
+                                View.VISIBLE
+                            }
+                            else -> {
+                                Log.d(TAG, "setupMiniPlayer: Hiding mini player - no song")
+                                View.GONE
+                            }
+                        }
+                    }
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "setupMiniPlayer: Error setting up mini player", e)
         }
     }
 
@@ -136,6 +183,7 @@ abstract class BaseFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        Log.d(TAG, "onDestroyView: Cleaning up mini player")
         miniPlayer = null
         super.onDestroyView()
     }

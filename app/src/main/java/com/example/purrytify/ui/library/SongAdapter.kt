@@ -18,6 +18,7 @@ import com.example.purrytify.player.MusicPlayerManager
 
 class SongAdapter(
     private val onNavigateToPlayer: (Song) -> Unit,
+    private val onItemPlay: (Song) -> Unit,
     private val onLikeClick: (Song) -> Unit,
     private val musicPlayerManager: MusicPlayerManager
 ) : ListAdapter<Song, SongAdapter.SongViewHolder>(DIFF_CALLBACK) {
@@ -31,15 +32,27 @@ class SongAdapter(
 
     inner class SongViewHolder(private val binding: ItemSongBinding) :
         RecyclerView.ViewHolder(binding.root) {
-            
+
         init {
-//            binding.root.setOnClickListener {
-//                val position = bindingAdapterPosition
-//                if (position != RecyclerView.NO_POSITION) {
-//                    onItemClick(getItem(position))
-//                }
-//            }
-            
+            // Click on whole item to play song
+            binding.root.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val song = getItem(position)
+                    musicPlayerManager.playSong(song)
+                }
+            }
+
+            // Click on album art to navigate to player
+            binding.ivAlbum.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val song = getItem(position)
+                    musicPlayerManager.playSong(song)
+                    onNavigateToPlayer(song)
+                }
+            }
+
             binding.ivLike.setOnClickListener {
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
@@ -87,9 +100,9 @@ class SongAdapter(
         val song = getItem(position)
         holder.bind(song)
 
-        holder.itemView.setOnClickListener {
-            musicPlayerManager.playSong(song) // Play song directly
-            onNavigateToPlayer(song) // Navigate to player
-        }
+//        holder.itemView.setOnClickListener {
+//            musicPlayerManager.playSong(song) // Play song directly
+//            onNavigateToPlayer(song) // Navigate to player
+//        }
     }
 }

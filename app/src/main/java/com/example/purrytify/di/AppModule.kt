@@ -3,6 +3,7 @@ package com.example.purrytify.di
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
+import com.example.purrytify.audio.AudioDeviceManager
 import com.example.purrytify.auth.TokenManager
 import com.example.purrytify.network.ApiClient
 import com.example.purrytify.network.ApiService
@@ -75,6 +76,13 @@ object AppModule {
             tokenManager
         )
     }
+
+    @Provides
+    @Singleton
+    fun provideAudioDeviceManager(
+        @ApplicationContext context: Context,
+        musicPlayerManager: MusicPlayerManager
+    ): AudioDeviceManager = AudioDeviceManager(context, musicPlayerManager)
 
     @Provides
     @Singleton

@@ -15,6 +15,7 @@ import com.example.purrytify.player.MusicPlayerManager
 import com.example.purrytify.utils.toFormattedDuration
 
 class SongGridAdapter(
+    private val onItemPlay: (Song) -> Unit,
     private val onItemClick: (Song) -> Unit,
     private val musicPlayerManager: MusicPlayerManager
 ) :
@@ -41,18 +42,29 @@ class SongGridAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         init {
-//            binding.root.setOnClickListener {
-//                val position = bindingAdapterPosition
-//                if (position != RecyclerView.NO_POSITION) {
-//                    onItemClick(getItem(position))
-//                }
-//            }
+            // Click on whole item to play song
+            binding.root.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val song = getItem(position)
+                    musicPlayerManager.playSong(song)
+                }
+            }
+
+            // Click on album art to navigate to player
+            binding.ivAlbum.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val song = getItem(position)
+                    musicPlayerManager.playSong(song)
+                    onItemClick(song) // This will navigate to player fragment
+                }
+            }
         }
 
         fun bind(song: Song) {
             binding.tvTitle.text = song.title
             binding.tvArtist.text = song.artist
-            Log.e("TEST SONG GRID",song.toString())
             binding.tvDuration.text = song.duration.toFormattedDuration()
 
             Glide.with(binding.ivAlbum)

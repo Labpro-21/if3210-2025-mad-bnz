@@ -162,8 +162,13 @@ class ProfileFragment : Fragment() {
     }
 
     private fun updateUI(user: User) {
+       binding.btnSettings.setOnClickListener{
+           findNavController().navigate(R.id.action_profileFragment_to_settingsFragment)
+       }
+
         binding.tvUsername.text = user.username
         binding.tvLocation.text = CountryUtils.getCountryName(user.location)
+
 
         // Load profile image
         val imageUrl = "${viewModel.getBaseUrl()}uploads/profile-picture/${user.profilePhoto}"

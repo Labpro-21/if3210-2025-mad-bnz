@@ -55,6 +55,7 @@ class PlayerViewModel @Inject constructor(
             }
         }
     }
+
     fun isLiked(songId: String): LiveData<Boolean> {
         val result = MutableLiveData<Boolean>(false)
 
@@ -66,13 +67,34 @@ class PlayerViewModel @Inject constructor(
         return result
     }
 
-
     fun getCurrentPosition(): Int {
         return musicPlayerManager.getCurrentPosition()
     }
 
+    fun updateSong(song: Song) {
+        viewModelScope.launch {
+            try {
+                songRepository.updateSong(song)
+                _currentSong.value = song
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+
+    fun deleteSong(song: Song) {
+        viewModelScope.launch {
+            try {
+                songRepository.deleteSong(song.id)
+                musicPlayerManager.release()
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
-        musicPlayerManager.cleanup()
+//        musicPlayerManager.cleanup()
     }
 }

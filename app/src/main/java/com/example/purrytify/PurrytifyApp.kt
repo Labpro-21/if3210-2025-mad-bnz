@@ -2,6 +2,7 @@ package com.example.purrytify
 
 import android.app.Application
 import android.os.StrictMode
+import android.util.Log
 import androidx.media3.common.BuildConfig
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
@@ -12,8 +13,16 @@ class PurrytifyApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        if (BuildConfig.DEBUG) {
-            enableStrictMode()
+        try {
+            // Initialize app components
+            if (BuildConfig.DEBUG) {
+                enableStrictMode()
+            }
+
+            // Add crash reporting
+            setupCrashHandling()
+        } catch (e: Exception) {
+            Log.e("PurrytifyApp", "Error initializing application", e)
         }
     }
 
@@ -34,5 +43,11 @@ class PurrytifyApp : Application() {
                 .penaltyLog()
                 .build()
         )
+    }
+
+    private fun setupCrashHandling() {
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            Log.e("PurrytifyApp", "Uncaught exception in thread $thread", throwable)
+        }
     }
 }

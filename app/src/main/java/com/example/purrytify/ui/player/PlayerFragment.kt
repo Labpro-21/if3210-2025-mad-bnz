@@ -1,10 +1,15 @@
 package com.example.purrytify.ui.player
 
+import android.app.AlertDialog
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import android.widget.SeekBar
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -12,10 +17,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.purrytify.R
+import com.example.purrytify.databinding.DialogAddSongBinding
 import com.example.purrytify.databinding.FragmentPlayerBinding
 import com.example.purrytify.model.Song
 import com.example.purrytify.player.MusicPlayerManager
 import com.example.purrytify.player.PlayerViewModel
+import com.example.purrytify.ui.common.BaseFragment
+import com.example.purrytify.utils.FilePickerHelper
+import com.example.purrytify.utils.ImagePickerHelper
+import com.example.purrytify.utils.showToast
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -27,12 +37,20 @@ import javax.inject.Inject
 class PlayerFragment : Fragment() {
     private var _binding: FragmentPlayerBinding? = null
     private val binding get() = _binding!!
+    private val playerViewModel: PlayerViewModel by viewModels()
+
 
     @Inject
-    lateinit var musicPlayerManager: MusicPlayerManager
+    lateinit var musicPlayerManager: MusicPlayerManager  // Inject directly instead of inheriting
+
     private var isSeekBarTracking = false
-    private val playerViewModel: PlayerViewModel by viewModels()
-    private var timeUpdateJob: Job? = null
+//    private var timeUpdateJob: Job? = null
+
+    // Add these properties
+    private lateinit var filePickerHelper: FilePickerHelper
+    private lateinit var imagePickerHelper: ImagePickerHelper
+    private var selectedImageUri: Uri? = null
+    private var selectedAudioUri: Uri? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,11 +58,125 @@ class PlayerFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPlayerBinding.inflate(inflater, container, false)
+
+        // Add menu to toolbar
+
+        binding.btnMore.setOnClickListener { showOptionsMenu(it) }
+
+
+        setupHelpers()
         return binding.root
+    }
+
+    private fun setupHelpers() {
+        filePickerHelper = FilePickerHelper(this) { song ->
+            playerViewModel.updateSong(song)
+        }
+        imagePickerHelper = ImagePickerHelper(this) { uri ->
+            selectedImageUri = uri
+        }
+    }
+
+    private fun showOptionsMenu(view: View) {
+        val popup = PopupMenu(requireContext(), view)
+        popup.menuInflater.inflate(R.menu.menu_player_options, popup.menu)
+
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_edit -> {
+                    playerViewModel.currentSong.value?.let { showEditSongDialog(it) }
+                    true
+                }
+                R.id.action_delete -> {
+                    showDeleteConfirmation()
+                    true
+                }
+                else -> false
+            }
+        }
+        popup.show()
+    }
+
+    private fun showEditSongDialog(song: Song) {
+        val dialogBinding = DialogAddSongBinding.inflate(layoutInflater)
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogBinding.root)
+            .create()
+
+        // Pre-fill current song data
+        dialogBinding.apply {
+            etTitle.setText(song.title)
+            etArtist.setText(song.artist)
+
+            // Load current cover art
+            Glide.with(requireContext())
+                .load(song.coverUrl)
+                .placeholder(R.drawable.ic_music_note)
+                .into(ivAlbumPreview)
+        }
+
+        dialogBinding.btnSelectAudio.setOnClickListener {
+            filePickerHelper.pickAudioFile()
+        }
+
+        dialogBinding.btnSelectCover.setOnClickListener {
+            imagePickerHelper.pickImage()
+        }
+
+        dialogBinding.btnAdd.setText("Update") // Change button text
+        dialogBinding.btnAdd.setOnClickListener {
+            val title = dialogBinding.etTitle.text.toString().trim()
+            val artist = dialogBinding.etArtist.text.toString().trim()
+            val audioUrl = selectedAudioUri?.toString() ?: song.path
+            val coverUrl = selectedImageUri?.toString() ?: song.coverUrl
+
+            if (title.isNotEmpty() && artist.isNotEmpty()) {
+                val updatedSong = song.copy(
+                    title = title,
+                    artist = artist,
+                    path = audioUrl,
+                    coverUrl = coverUrl
+                )
+                playerViewModel.updateSong(updatedSong)
+                dialog.dismiss()
+                requireContext().showToast("Song updated successfully")
+            } else {
+                requireContext().showToast("Title and artist are required")
+            }
+        }
+
+        dialogBinding.btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun showDeleteConfirmation() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Song")
+            .setMessage("Are you sure you want to delete this song?")
+            .setPositiveButton("Delete") { _, _ ->
+                playerViewModel.currentSong.value?.let { song ->
+                    playerViewModel.deleteSong(song)
+                    findNavController().navigateUp()
+                    requireContext().showToast("Song deleted successfully")
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            findNavController().navigateUp()
+        }
+
+        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner) {
+            findNavController().navigateUp()
+        }
         val songFromArgs = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             arguments?.getSerializable("song", Song::class.java)
         } else {
@@ -69,14 +201,14 @@ class PlayerFragment : Fragment() {
         binding.btnPlayPause.setOnClickListener {
             musicPlayerManager.togglePlayPause()
         }
-        binding.btnLike.setOnClickListener{
+        binding.btnLike.setOnClickListener {
             playerViewModel.toggleLike()
         }
         setupUI()
         observeViewModel()
         observePlayerState()
         setupSeekBar()
-        startTimeUpdate()
+//        startTimeUpdate()
     }
 
     private fun setupUI() {
@@ -150,6 +282,10 @@ class PlayerFragment : Fragment() {
                 )
                 binding.seekBar.max = song.duration.toInt()
                 binding.tvTotalTime.text = formatDuration(song.duration)
+
+                if (!song.isLocal || !song.isDownloaded){
+                    binding.btnMore.visibility = View.INVISIBLE
+                }
             }
         }
         playerViewModel.isPlaying.observe(viewLifecycleOwner) { isPlaying ->
@@ -171,6 +307,7 @@ class PlayerFragment : Fragment() {
             }
         }
     }
+
     private fun updateLikeButtonState(isLiked: Boolean) {
         binding.btnLike.setImageResource(
             if (isLiked) R.drawable.ic_liked
@@ -188,11 +325,16 @@ class PlayerFragment : Fragment() {
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
                 isSeekBarTracking = true
+//                musicPlayerManager.pausePositionUpdates()
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 seekBar?.let {
-                    musicPlayerManager.seekTo(it.progress * 1000) // Convert seconds to milliseconds
+                    try {
+                        musicPlayerManager.seekTo(it.progress * 1000)
+                    } catch (e: Exception) {
+                        Log.e("PlayerFragment", "Seek error", e)
+                    }
                 }
                 isSeekBarTracking = false
             }
@@ -208,47 +350,55 @@ class PlayerFragment : Fragment() {
 
 
     private fun observePlayerState() {
-        musicPlayerManager.currentSong.observe(viewLifecycleOwner) { song ->
-            if (song != null) {
-                updateSongUI(song)
-            } else {
-                findNavController().navigateUp()
+
+        lifecycleScope.launch {
+            try{
+                musicPlayerManager.currentSong.observe(viewLifecycleOwner) { song ->
+                    song?.let { updateSongUI(it) } ?: findNavController().navigateUp()
+                }
+
+                musicPlayerManager.isPlaying.observe(viewLifecycleOwner) { isPlaying ->
+                    binding.btnPlayPause.setImageResource(
+                        if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
+                    )
+                }
+
+                musicPlayerManager.currentPosition.observe(viewLifecycleOwner) { position ->
+                    if (!isSeekBarTracking) {
+                        binding.tvCurrentTime.text = formatDuration(position.toLong())
+                        binding.seekBar.progress = position / 1000
+                    }
+                }
+
+                musicPlayerManager.isShuffleEnabled.observe(viewLifecycleOwner) { isShuffleEnabled ->
+                    binding.btnShuffle.setImageResource(
+                        if (isShuffleEnabled) R.drawable.ic_shuffle_on else R.drawable.ic_shuffle
+                    )
+                }
+
+                musicPlayerManager.songDuration.observe(viewLifecycleOwner) { duration ->
+                    binding.tvTotalTime.text = formatDuration(duration)
+                    binding.seekBar.max = (duration / 1000).toInt() // Convert milliseconds to seconds
+                }
+
+                musicPlayerManager.repeatMode.observe(viewLifecycleOwner) { repeatMode ->
+                    val iconRes = when (repeatMode) {
+                        MusicPlayerManager.RepeatMode.OFF -> R.drawable.ic_repeat
+                        MusicPlayerManager.RepeatMode.REPEAT_ALL -> R.drawable.ic_repeat_all
+                        MusicPlayerManager.RepeatMode.REPEAT_ONE -> R.drawable.ic_repeat_one
+                    }
+                    binding.btnRepeat.setImageResource(iconRes)
+                }
+
+            } catch (e : Exception){
+                Log.e("PlayerFragment", "Error observing currentSong", e)
             }
         }
 
-        musicPlayerManager.isPlaying.observe(viewLifecycleOwner) { isPlaying ->
-            binding.btnPlayPause.setImageResource(
-                if (isPlaying) R.drawable.ic_pause
-                else R.drawable.ic_play
-            )
-        }
 
-        musicPlayerManager.currentPosition.observe(viewLifecycleOwner) { position ->
-            if (!isSeekBarTracking) {  // Use a class-level variable instead of isPressed
-                binding.tvCurrentTime.text = formatDuration(position.toLong())
-                binding.seekBar.progress = position / 1000 // Convert milliseconds to seconds for SeekBar
-            }
-        }
 
-        musicPlayerManager.songDuration.observe(viewLifecycleOwner) { duration ->
-            binding.tvTotalTime.text = formatDuration(duration)
-            binding.seekBar.max = (duration / 1000).toInt() // Convert milliseconds to seconds
-        }
 
-        musicPlayerManager.isShuffleEnabled.observe(viewLifecycleOwner) { isShuffleEnabled ->
-            binding.btnShuffle.setImageResource(
-                if (isShuffleEnabled) R.drawable.ic_shuffle_on else R.drawable.ic_shuffle
-            )
-        }
 
-        musicPlayerManager.repeatMode.observe(viewLifecycleOwner) { repeatMode ->
-            val iconRes = when (repeatMode) {
-                MusicPlayerManager.RepeatMode.OFF -> R.drawable.ic_repeat
-                MusicPlayerManager.RepeatMode.REPEAT_ALL -> R.drawable.ic_repeat_all
-                MusicPlayerManager.RepeatMode.REPEAT_ONE -> R.drawable.ic_repeat_one
-            }
-            binding.btnRepeat.setImageResource(iconRes)
-        }
 
 
     }
@@ -272,35 +422,48 @@ class PlayerFragment : Fragment() {
         return String.format("%02d:%02d", minutes, seconds)
     }
 
-    private fun startTimeUpdate() {
-        timeUpdateJob?.cancel() // Cancel any existing job
-        timeUpdateJob = viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                while (true) {
-                    if (!isSeekBarTracking && isActive) {
-                        val position = musicPlayerManager.getCurrentPosition()
-                        binding.tvCurrentTime.text = formatTime(position)
-                        binding.seekBar.progress = position / 1000 // Convert to seconds
-                    }
-                    delay(1000)
-                }
-            } catch (e: Exception) {
-                // Handle any errors
-                e.printStackTrace()
-            }
-        }
+//    private fun startTimeUpdate() {
+//        timeUpdateJob?.cancel() // Cancel any existing job
+//        timeUpdateJob = viewLifecycleOwner.lifecycleScope.launch {
+//            try {
+//                while (true) {
+//                    if (!isSeekBarTracking && isActive) {
+//                        val position = musicPlayerManager.getCurrentPosition()
+//                        binding.tvCurrentTime.text = formatTime(position)
+//                        binding.seekBar.progress = position / 1000 // Convert to seconds
+//                    }
+//                    delay(1000)
+//                }
+//            } catch (e: Exception) {
+//                // Handle any errors
+//                e.printStackTrace()
+//            }
+//        }
+//    }
+
+
+    override fun onResume() {
+        super.onResume()
+        musicPlayerManager.setPlayerFragmentVisible(true)
     }
 
     override fun onPause() {
         super.onPause()
-        timeUpdateJob?.cancel() // Cancel the job when fragment is paused
+        musicPlayerManager.setPlayerFragmentVisible(false)
     }
 
     override fun onDestroyView() {
-        timeUpdateJob?.cancel() // Clean up the coroutine
+//        timeUpdateJob?.cancel()
+        selectedImageUri = null
+        selectedAudioUri = null
         _binding = null
+        // Don't cancel player operations here
         super.onDestroyView()
     }
 
+    override fun onStop() {
+        super.onStop()
+//        timeUpdateJob?.cancel() // Cancel UI updates only
+    }
 
 }

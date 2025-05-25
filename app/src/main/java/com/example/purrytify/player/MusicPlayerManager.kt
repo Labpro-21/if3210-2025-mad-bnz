@@ -8,8 +8,14 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import android.media.AudioAttributes
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.LifecycleOwner
+import com.example.purrytify.audio.AudioDevice
+import com.example.purrytify.audio.AudioDeviceType
 import com.example.purrytify.auth.TokenManager
 import com.example.purrytify.model.PlaylistRecommendation
 import com.example.purrytify.model.Song
@@ -24,6 +30,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -41,6 +50,7 @@ class MusicPlayerManager @Inject constructor(
     private val tokenManager: TokenManager
 ) {
     private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val playerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var mediaPlayer: MediaPlayer? = null
     private var isInitialized = false
     private var positionUpdateJob: Job? = null
@@ -91,8 +101,26 @@ class MusicPlayerManager @Inject constructor(
         OFF, REPEAT_ALL, REPEAT_ONE
     }
 
-    private var retryCount = 0
-    private val MAX_RETRY_ATTEMPTS = 3
+    private val _isPlayerFragmentVisible = MutableStateFlow(false)
+    val isPlayerFragmentVisible: StateFlow<Boolean> = _isPlayerFragmentVisible.asStateFlow()
+
+
+    fun setPlayerFragmentVisible(isVisible: Boolean) {
+        _isPlayerFragmentVisible.value = isVisible
+        // Update notification when visibility changes
+        currentSong.value?.let { updateNotificationService(it) }
+    }
+    private fun updateNotificationService(song: Song) {
+        val intent = Intent(context, NotificationService::class.java).apply {
+            action = NotificationService.ACTION_UPDATE
+            putExtra("isPlayerVisible", _isPlayerFragmentVisible.value)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent)
+        } else {
+            context.startService(intent)
+        }
+    }
 
 
     private var currentRecommendedPlaylist: PlaylistRecommendation? = null
@@ -145,9 +173,10 @@ class MusicPlayerManager @Inject constructor(
         viewModelScope.launch {
             try {
                 _isLoading.postValue(true)
+                stopPositionUpdates()
                 releaseMediaPlayer()
                 _currentPosition.postValue(0)
-                stopPositionUpdates()
+
 
 
                 // Update playlist source
@@ -177,32 +206,23 @@ class MusicPlayerManager @Inject constructor(
                                 .build()
                         )
 
-                        setOnErrorListener { mp, what, extra ->
-                            Log.e("MusicPlayerManager", "MediaPlayer error: $what, $extra for path: ${song.path}")
+                        setOnPreparedListener {
+                            start()
+                            _isPlaying.postValue(true)
+                            _songDuration.postValue(duration.toLong())
+                            startPositionUpdates()
+                            _isLoading.postValue(false)
+                        }
 
-                            if (retryCount < MAX_RETRY_ATTEMPTS) {
-                                retryCount++
-                                viewModelScope.launch {
-                                    delay(1000) // Wait a second before retrying
-                                    playSong(song) // Retry playback
-                                }
-                                true
-                            } else {
-                                retryCount = 0
-                                isPreparing = false
-                                _isPlaying.postValue(false)
-                                releaseMediaPlayer()
-                                true
-                            }
+                        setOnErrorListener { _, what, extra ->
+                            Log.e("MusicPlayerManagerPlaySong", "Error $what, $extra")
+                            _isPlaying.postValue(false)
+                            _isLoading.postValue(false)
+                            true
                         }
 
                         if (song.isLocal || song.isDownloaded) {
-//                            val file = File(song.path)
-//                            if (file.exists()) {
                             setDataSource(context, Uri.parse(song.path))
-//                            } else {
-//                                throw IOException("Local file not found")
-//                            }
                         } else {
                             setDataSource(song.path)
                         }
@@ -216,31 +236,17 @@ class MusicPlayerManager @Inject constructor(
 
                         prepareAsync()
 
-                        setOnPreparedListener {
-                            retryCount = 0
-                            isPreparing = false
-                            start()
-                            _isPlaying.postValue(true)
-                            _songDuration.postValue(duration.toLong())
-                            startPositionUpdates()
-
-                            if (song.isLocal || song.isDownloaded) {
-                                viewModelScope.launch {
-                                    songRepository.updateLastPlayed(song.id, System.currentTimeMillis())
-                                }
-                            }
-                        }
-
                         setOnCompletionListener {
-                            _isPlaying.postValue(false)
-                            stopPositionUpdates()
+//                            _isPlaying.postValue(false)
+//                            stopPositionUpdates()
                             playNextSong()
                         }
 
 //                        prepareAsync()
                     } catch (e: Exception) {
+                        recoverFromError()
                         Log.e("MusicPlayerManager", "Error setting up MediaPlayer for path: ${song.path}", e)
-                        releaseMediaPlayer()
+//                        releaseMediaPlayer()
                         throw e
                     }
                 }
@@ -418,19 +424,18 @@ class MusicPlayerManager @Inject constructor(
     fun seekTo(position: Int) {
         try {
             mediaPlayer?.let { player ->
-                if (!isPreparing) {
-                    player.seekTo(position)
-                    _currentPosition.postValue(position)
-                }
+                if (!player.isPlaying) player.start()
+                player.seekTo(position)
+                _currentPosition.postValue(position)
             }
         } catch (e: Exception) {
-            Log.e("MusicPlayerManager", "Error seeking to position", e)
+            Log.e("MusicPlayerManager", "Seek error", e)
         }
     }
 
     private fun startPositionUpdates() {
         positionUpdateJob?.cancel()
-        positionUpdateJob = viewModelScope.launch {
+        positionUpdateJob = playerScope.launch {
             var lastUpdateTime = System.currentTimeMillis()
             while (isActive) {
                 try {
@@ -438,7 +443,6 @@ class MusicPlayerManager @Inject constructor(
                         if (player.isPlaying) {
                             val currentTime = System.currentTimeMillis()
                             val playedDuration = currentTime - lastUpdateTime
-
                             // Update analytics every second
                             if (playedDuration >= 1000) {
                                 _currentSong.value?.let { song ->
@@ -513,10 +517,150 @@ class MusicPlayerManager @Inject constructor(
     }
     fun cleanup() {
         notificationService?.stopSelf()
+        playerScope.cancel()
         releaseMediaPlayer()
         stopPositionUpdates()
         viewModelScope.cancel()
     }
 
 
+    private fun recoverFromError() {
+        releaseMediaPlayer()
+        currentSong.value?.let { song ->
+            playSong(song)
+        }
+    }
+
+    private fun handleMediaPlayerError(what: Int, extra: Int) {
+        playerScope.launch {
+            stopPositionUpdates()
+            releaseMediaPlayer()
+
+        }
+    }
+
+
+    fun recreatePlayer(deviceInfo: AudioDeviceInfo) {
+        val TAG = "MusicPlayerManager"
+        Log.d(TAG, "Recreating media player for device: ${deviceInfo.productName}")
+
+        try {
+            val currentSong = _currentSong.value
+            val currentPosition = mediaPlayer?.currentPosition ?: 0
+            val wasPlaying = mediaPlayer?.isPlaying ?: false
+
+            // Release current player
+            Log.d(TAG, "Releasing current media player")
+            releaseMediaPlayer()
+
+            // Create new player with selected device
+            if (currentSong != null) {
+                Log.d(TAG, "Creating new media player for song: ${currentSong.title}")
+                mediaPlayer = MediaPlayer().apply {
+                    // Set audio attributes based on device type
+                    val attributes = when (deviceInfo.type) {
+                        AudioDeviceInfo.TYPE_BUILTIN_SPEAKER -> {
+                            Log.d(TAG, "Setting attributes for internal speaker")
+                            AudioAttributes.Builder()
+                                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                .setUsage(AudioAttributes.USAGE_MEDIA)
+                                .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+                                .build()
+                        }
+                        AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
+                        AudioDeviceInfo.TYPE_BLUETOOTH_SCO -> {
+                            Log.d(TAG, "Setting attributes for Bluetooth")
+                            AudioAttributes.Builder()
+                                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                .setUsage(AudioAttributes.USAGE_MEDIA)
+                                .build()
+                        }
+                        else -> {
+                            Log.d(TAG, "Setting default attributes")
+                            AudioAttributes.Builder()
+                                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                .setUsage(AudioAttributes.USAGE_MEDIA)
+                                .build()
+                        }
+                    }
+                    setAudioAttributes(attributes)
+
+                    // Force audio routing before setting data source
+                    if (deviceInfo.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) {
+                        Log.d(TAG, "Forcing speaker output")
+                        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                        audioManager.clearCommunicationDevice()
+                    } else {
+                        Log.d(TAG, "Setting preferred device: ${deviceInfo.productName}")
+                        setPreferredDevice(deviceInfo)
+                    }
+
+                    // Set data source
+                    Log.d(TAG, "Setting data source: ${currentSong.path}")
+                    if (currentSong.isLocal || currentSong.isDownloaded) {
+                        setDataSource(context, Uri.parse(currentSong.path))
+                    } else {
+                        setDataSource(currentSong.path)
+                    }
+                    setOnErrorListener { mp, what, extra ->
+                        Log.e(TAG, "Media player error: what=$what, extra=$extra")
+                        // Try to recover
+                        when (what) {
+                            MediaPlayer.MEDIA_ERROR_SERVER_DIED -> {
+
+                                Handler(Looper.getMainLooper()).post {
+                                    recreatePlayer(deviceInfo)
+                                }
+                            }
+                        }
+                        true // Indicate we handled the error
+                    }
+
+                    setOnPreparedListener {
+                        Log.d(TAG, "Media player prepared")
+                        seekTo(currentPosition)
+                        if (wasPlaying) {
+                            start()
+                            _isPlaying.postValue(true)
+                        }
+                        // Verify audio output
+                        val actualDevice = preferredDevice
+                        Log.d(TAG, "Current audio device: ${actualDevice?.productName ?: "default"}")
+                    }
+
+                    setOnErrorListener { _, what, extra ->
+                        Log.e(TAG, "Media player error: $what, $extra")
+                        false
+                    }
+
+                    prepareAsync()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error recreating player", e)
+            _isPlaying.postValue(false)
+        }
+    }
+
+    fun setPreferredDevice(deviceInfo: AudioDeviceInfo): Boolean {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                mediaPlayer?.setPreferredDevice(deviceInfo) ?: false
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            Log.e("MusicPlayerManager", "Failed to set preferred device", e)
+            false
+        }
+    }
+
+    fun getCurrentAudioDevice(): AudioDeviceInfo? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mediaPlayer?.preferredDevice
+        } else {
+            null
+        }
+    }
 }
+

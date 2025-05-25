@@ -45,7 +45,55 @@
             android:padding="16dp">
 
 
-            <!-- About Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="AUDIO OUTPUT"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp" />
+
+            <!-- Output Sound -->
+            <LinearLayout
+                android:id="@+id/optionOutput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvOutputDevice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Internal Speaker"
+                        android:textSize="16sp"
+                        android:layout_weight="1"
+                        android:textColor="@color/white"/>
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_chevron_right"
+                    android:layout_gravity="center_vertical"/>
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#333333" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -97,6 +145,7 @@
                 android:text="Logout"
                 android:textColor="@color/white"
                 android:textSize="16sp" />
+
 
         </LinearLayout>
     </ScrollView>

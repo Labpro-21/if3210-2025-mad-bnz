@@ -20,6 +20,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.purrytify.R
 import com.example.purrytify.databinding.DialogAddSongBinding
 import com.example.purrytify.databinding.FragmentLibraryBinding
@@ -93,6 +94,7 @@ class LibraryFragment : BaseFragment() {
                     }
                 )
             },
+            onItemPlay = {song -> musicPlayerManager.playSong(song)},
             onLikeClick = { song ->
                 viewModel.toggleLike(song)
             },
@@ -216,9 +218,10 @@ class LibraryFragment : BaseFragment() {
 
     private fun showAddSongDialog() {
         val dialogBinding = DialogAddSongBinding.inflate(layoutInflater)
-        val dialog = AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext(),R.style.Theme_Dialog)
             .setView(dialogBinding.root)
             .create()
+
 
         selectedAudioUri = null
         selectedImageUri = null
@@ -231,16 +234,18 @@ class LibraryFragment : BaseFragment() {
 
 
                 selectedAudioUri = Uri.parse(song.path)
-
+                dialogBinding.tvAudioPath.text = selectedAudioUri?.path
                 dialogBinding.etTitle.setText(song.title)
                 dialogBinding.etArtist.setText(song.artist)
                 songDuration = song.duration // Store the song duration
 
                 if (song.coverUrl.toString().isNotEmpty()) {
                     selectedImageUri = Uri.parse(song.coverUrl)
+                    dialogBinding.tvCoverPath.text = selectedImageUri?.path
                     Glide.with(requireContext())
                         .load(selectedImageUri)
                         .placeholder(R.drawable.ic_music_note)
+                        .transform(RoundedCorners(8))
                         .into(dialogBinding.ivAlbumPreview)
                 }
             }
@@ -256,9 +261,11 @@ class LibraryFragment : BaseFragment() {
             imagePickerHelper.setCallback { uri ->
                 selectedImageUri = uri
 
+                dialogBinding.tvCoverPath.text = Uri.parse(uri.toString()).path
                 Glide.with(requireContext())
                     .load(uri)
                     .placeholder(R.drawable.ic_music_note)
+                    .transform(RoundedCorners(8))
                     .into(dialogBinding.ivAlbumPreview)
             }
             imagePickerHelper.pickImage()

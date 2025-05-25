@@ -12,6 +12,7 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -25,6 +26,7 @@ import com.example.purrytify.R
 import com.example.purrytify.auth.LoginActivity
 import com.example.purrytify.auth.TokenRefreshService
 import com.example.purrytify.databinding.ActivityMainBinding
+import com.example.purrytify.databinding.MiniPlayerBinding
 import com.example.purrytify.model.Song
 import com.example.purrytify.network.NetworkStatus
 import com.example.purrytify.network.NetworkStatusHelper
@@ -33,8 +35,10 @@ import com.example.purrytify.player.PlayerViewModel
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -42,123 +46,207 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    @Inject
+    private var miniPlayerBinding: MiniPlayerBinding? = null
+    @Inject 
     lateinit var musicPlayerManager: MusicPlayerManager
-    private lateinit var logoutReceiver: BroadcastReceiver
     private lateinit var networkStatusHelper: NetworkStatusHelper
     private lateinit var snackbar: Snackbar
     private val viewModel: MainViewModel by viewModels()
+    private var updateJob: Job? = null
+
+    private lateinit var logoutReceiver: BroadcastReceiver
+
+    private val TAG = "MainActivity" // Add this for consistent logging
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "onCreate: Starting initialization")
         super.onCreate(savedInstanceState)
-
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        Log.d(TAG, "onCreate: Setting initial mini player visibility to GONE")
+        binding.miniPlayerLayout.root.visibility = View.GONE
+        
         try {
-            window.setFlags(
-                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
-                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-            )
+            Log.d(TAG, "onCreate: Starting setup sequence")
+            setupInitialUI()
+            lifecycleScope.launch(Dispatchers.Main) {
+                initializeComponents()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "onCreate: Error during initialization", e)
+            handleInitializationError(e)
+        }
+    }
 
-            binding = ActivityMainBinding.inflate(layoutInflater)
-            setContentView(binding.root)
-
+    private fun setupInitialUI() {
+        Log.d(TAG, "setupInitialUI: Starting UI setup")
+        binding.apply {
+            Log.d(TAG, "setupInitialUI: Setting up bottom navigation")
             setupBottomNavigation()
+            Log.d(TAG, "setupInitialUI: Setting mini player visibility to GONE")
+            miniPlayerLayout.root.visibility = View.GONE
+        }
+    }
 
-            lifecycleScope.launch {
+    private suspend fun initializeComponents() {
+        Log.d(TAG, "initializeComponents: Starting components initialization")
+        withContext(Dispatchers.Main) {
+            try {
+                Log.d(TAG, "initializeComponents: Initializing MusicPlayerManager")
                 withContext(Dispatchers.Default) {
                     musicPlayerManager.initialize()
                 }
-            }
-            val miniPlayer = findViewById<ConstraintLayout>(R.id.miniPlayerLayout)
-            val playPauseButton = findViewById<ImageView>(R.id.minibtnPlayPause)
-            val nextButton = findViewById<ImageView>(R.id.minibtnNext)
-            val miniPlayerTitle = findViewById<TextView>(R.id.miniPlayerTitle)
-            val miniPlayerArtist = findViewById<TextView>(R.id.miniPlayerArtist)
 
-            if (miniPlayer != null && playPauseButton != null) {
-                musicPlayerManager.currentSong.observe(this) { song ->
-                    if (song != null) {
-                        miniPlayer.visibility = View.VISIBLE
-                        miniPlayerTitle?.text = song.title
-                        miniPlayerArtist?.text = song.artist
-                        updateMiniPlayerUI(song = song)
-                        Log.d("MainActivity", "Updated mini player: ${song.title} (ID: ${song.id})")
-                    } else {
-                        miniPlayer.visibility = View.GONE
+                Log.d(TAG, "initializeComponents: Setting up mini player")
+                setupMiniPlayer()
+
+                Log.d(TAG, "initializeComponents: Setting up network monitoring")
+                setupNetworkMonitoring()
+
+                Log.d(TAG, "initializeComponents: Registering broadcast receivers")
+                registerBroadcastReceivers()
+
+                Log.d(TAG, "initializeComponents: Setting up player visibility observer")
+                observePlayerVisibility()
+            } catch (e: Exception) {
+                Log.e(TAG, "initializeComponents: Error during component initialization", e)
+                handleInitializationError(e)
+            }
+        }
+    }
+
+    private fun observePlayerVisibility() {
+        lifecycleScope.launch {
+            musicPlayerManager.isPlayerFragmentVisible.collect { isVisible ->
+
+                binding.miniPlayerLayout?.root?.visibility = when {
+                    isVisible -> {
+
+                        View.GONE
+                    }
+                    musicPlayerManager.currentSong.value != null -> {
+
+                        View.VISIBLE
+                    }
+                    else -> {
+                        View.GONE
                     }
                 }
-                musicPlayerManager.isPlaying.observe(this) { isPlaying ->
-                    playPauseButton?.setImageResource(
+            }
+        }
+    }
+
+    private fun registerBroadcastReceivers() {
+        logoutReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action == TokenRefreshService.ACTION_LOGOUT) {
+                    logoutUser()
+                }
+            }
+        }
+        registerReceiver(logoutReceiver, IntentFilter(TokenRefreshService.ACTION_LOGOUT))
+    }
+
+    private fun handleInitializationError(error: Exception) {
+        Toast.makeText(
+            this,
+            "Failed to initialize app. Please try again.",
+            Toast.LENGTH_LONG
+        ).show()
+
+        Log.e("MainActivity", "Initialization error", error)
+        finish()
+    }
+
+    private fun setupMiniPlayer() {
+        Log.d(TAG, "setupMiniPlayer: Starting mini player setup")
+        binding.miniPlayerLayout?.apply {
+            Log.d(TAG, "setupMiniPlayer: Setting initial visibility to GONE")
+            root.visibility = View.GONE
+            
+            lifecycleScope.launch {
+                Log.d(TAG, "setupMiniPlayer: Setting up visibility collectors and observers")
+                launch {
+                    musicPlayerManager.isPlayerFragmentVisible.collect { isPlayerVisible ->
+                        Log.d(TAG, "setupMiniPlayer: Player fragment visibility changed to: $isPlayerVisible")
+                        if (isPlayerVisible) {
+                            root.visibility = View.GONE
+                        } else {
+                            root.visibility = if (musicPlayerManager.currentSong.value != null) {
+                                Log.d(TAG, "setupMiniPlayer: Showing mini player - song exists")
+                                View.VISIBLE
+                            } else {
+                                Log.d(TAG, "setupMiniPlayer: Hiding mini player - no song")
+                                View.GONE
+                            }
+                        }
+                    }
+                }
+                musicPlayerManager.currentSong.observe(this@MainActivity) { song ->
+                    if (song != null) {
+                        root.visibility = View.VISIBLE
+                        miniPlayerTitle.text = song.title
+                        miniPlayerArtist.text = song.artist
+                        updateMiniPlayerUI(song)
+                    } else {
+                        root.visibility = View.GONE
+                    }
+                }
+                musicPlayerManager.isPlaying.observe(this@MainActivity) { isPlaying ->
+                    minibtnPlayPause?.setImageResource(
                         if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
                     )
                 }
 
-                miniPlayer.setOnClickListener {
-                    findNavController(R.id.nav_host_fragment).navigate(R.id.playerFragment)
-                }
-
-                playPauseButton.setOnClickListener {
-                    musicPlayerManager.togglePlayPause()
-                }
-                nextButton.setOnClickListener{
-                    musicPlayerManager.playNextSong()
-                }
-            } else {
-                Log.e("MainActivity", "Mini player views not found in layout")
             }
 
-            logoutReceiver = object : BroadcastReceiver() {
-                override fun onReceive(context: Context, intent: Intent) {
-                    if (intent.action == TokenRefreshService.ACTION_LOGOUT) {
-                        logoutUser()
-                    }
-                }
+            // Setup click listeners
+            root.setOnClickListener {
+                findNavController(R.id.nav_host_fragment).navigate(R.id.playerFragment)
             }
 
-            registerReceiver(
-                logoutReceiver,
-                IntentFilter(TokenRefreshService.ACTION_LOGOUT),
-                Context.RECEIVER_EXPORTED // Add this flag
-            )
-            setupNetworkMonitoring()
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Error in onCreate", e)
+            minibtnPlayPause.setOnClickListener {
+                musicPlayerManager.togglePlayPause()
+            }
+
+            minibtnNext.setOnClickListener {
+                musicPlayerManager.playNextSong()
+            }
         }
-
-
     }
+
     private fun updateMiniPlayerUI(song: Song) {
-        try {
-            val songTitle = findViewById<TextView>(R.id.miniPlayerTitle)
-            val artistName = findViewById<TextView>(R.id.miniPlayerArtist)
-            val coverImage = findViewById<ImageView>(R.id.miniPlayerCover)
-            val progressBar = findViewById<ProgressBar>(R.id.miniPlayerProgress)
+        binding.apply {
+            miniPlayerLayout?.let { layout ->
+                layout.miniPlayerTitle.text = song.title
+                layout.miniPlayerArtist.text = song.artist
 
-            songTitle.text = song.title
-            artistName.text = song.artist
-            Glide.with(this)
-                .load(song.coverUrl)
-                .placeholder(R.drawable.ic_placeholder_album)
-                .transform(RoundedCorners(10))
-                .override(48, 48)
-                .into(coverImage)
+                Glide.with(this@MainActivity)
+                    .load(song.coverUrl)
+                    .placeholder(R.drawable.ic_placeholder_album)
+                    .transform(RoundedCorners(8))
+                    .override(48, 48)
+                    .into(layout.miniPlayerCover)
 
-            lifecycleScope.launch {
-                while (true) {
-                    try {
-                        if (musicPlayerManager.isPlaying.value == true) {
-                            val position = musicPlayerManager.getCurrentPosition()
-                            val duration = musicPlayerManager.getDuration()
-                            if (duration > 0) {
-                                progressBar.progress = (position * 100 / duration)
+                updateJob?.cancel()
+                updateJob = lifecycleScope.launch {
+                    while (isActive) {
+                        try {
+                            if (musicPlayerManager.isPlaying.value == true) {
+                                val position = musicPlayerManager.getCurrentPosition()
+                                val duration = musicPlayerManager.getDuration()
+                                if (duration > 0) {
+                                    layout.miniPlayerProgress.progress = (position * 100 / duration)
+                                }
                             }
+                        } catch (e: Exception) {
+                            Log.e("MainActivity", "Error updating progress", e)
                         }
-                    } catch (e: Exception) {
-                        Log.e("MainActivity", "Error updating progress", e)
+                        delay(1000)
                     }
-                    delay(1000)
                 }
             }
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Error updating mini player UI", e)
         }
     }
     private fun logoutUser() {
@@ -206,10 +294,20 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNavigation.setupWithNavController(navController)
     }
     override fun onDestroy() {
-        super.onDestroy()
-//        lifecycleScope.coroutineContext.cancelChildren()
-        musicPlayerManager.cleanup()
-        unregisterReceiver(logoutReceiver)
-        networkStatusHelper.unregister()
+        Log.d(TAG, "onDestroy: Starting cleanup")
+        try {
+            updateJob?.cancel()
+            musicPlayerManager.cleanup()
+            if (::logoutReceiver.isInitialized) {
+                unregisterReceiver(logoutReceiver)
+            }
+            if (::networkStatusHelper.isInitialized) {
+                networkStatusHelper.unregister()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "onDestroy: Error during cleanup", e)
+        } finally {
+            super.onDestroy()
+        }
     }
 }

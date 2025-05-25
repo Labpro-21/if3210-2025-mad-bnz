@@ -131,13 +131,17 @@ class HomeFragment : BaseFragment() {
 
 
         newReleasesAdapter = SongGridAdapter(
-            onItemClick = { song -> navigateToPlayer(song) },
+            onItemClick ={ song -> navigateToPlayer(song)} ,
+            onItemPlay = { song ->
+                musicPlayerManager.playSong(song)
+            },
             musicPlayerManager = musicPlayerManager
         )
         binding.tvCountryName.text = CountryUtils.getCountryName(viewModel.userInfo.value?.location.toString()) ?: "Loading..."
 
 
         recentlyPlayedAdapter = SongAdapter(
+            onItemPlay = {song -> musicPlayerManager.playSong(song)},
             onNavigateToPlayer = { song -> navigateToPlayer(song) },
             onLikeClick = { song -> viewModel.toggleLike(song) },
             musicPlayerManager = musicPlayerManager

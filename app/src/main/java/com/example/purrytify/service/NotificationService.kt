@@ -1,4 +1,6 @@
+@file:OptIn(ExperimentalStdlibApi::class)
 package com.example.purrytify.service
+
 
 import android.annotation.SuppressLint
 import android.app.Notification
@@ -9,6 +11,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.graphics.Bitmap
 import android.os.Build
+import android.os.SystemClock
 import android.provider.Settings.Global.putString
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -30,6 +33,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
+
 @AndroidEntryPoint
 class NotificationService : LifecycleService() {
     
@@ -48,7 +53,7 @@ class NotificationService : LifecycleService() {
         notificationManager = NotificationManagerCompat.from(this)
         createNotificationChannel()
         setupMediaSession()
-        observePlayback()
+//        observePlayback()
         startProgressUpdates()
     }
 
@@ -80,11 +85,13 @@ class NotificationService : LifecycleService() {
     }
 
     private fun updateNotificationMetadata(song: Song) {
+        val duration = musicPlayerManager.getDuration()
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.mipmap.ic_purrytify_logo_foreground)
             .setLargeIcon(loadAlbumArt(song.coverUrl))
             .setContentTitle(song.title)
             .setContentText(song.artist)
+            .setSubText(formatTime(duration))
             .setContentIntent(createContentIntent())
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             // Add shuffle button
@@ -137,6 +144,7 @@ class NotificationService : LifecycleService() {
             .setLargeIcon(loadAlbumArt(currentSong.coverUrl))
             .setContentTitle(currentSong.title)
             .setContentText(currentSong.artist)
+            .setSubText(formatTime(duration))
             .setContentIntent(createContentIntent())
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             // Add shuffle button
@@ -190,42 +198,44 @@ class NotificationService : LifecycleService() {
     private fun updateNotificationProgress() {
         lifecycleScope.launch {
             while (true) {
-                if (musicPlayerManager.isPlaying.value == true) {
-                    val currentSong = musicPlayerManager.currentSong.value ?: continue
+                val currentSong = musicPlayerManager.currentSong.value
+                val isPlaying = musicPlayerManager.isPlaying.value == true
+
+                if (currentSong != null) {
                     val currentPosition = musicPlayerManager.getCurrentPosition()
                     val duration = musicPlayerManager.getDuration()
                     updatePlaybackState(currentPosition)
+
+                    val metadataBuilder = MediaMetadataCompat.Builder()
+                        .putString(MediaMetadataCompat.METADATA_KEY_TITLE, currentSong.title)
+                        .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, currentSong.artist)
+                        .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration.toLong())
+
+                    mediaSession.setMetadata(metadataBuilder.build())
 
                     val notification = NotificationCompat.Builder(this@NotificationService, channelId)
                         .setSmallIcon(R.mipmap.ic_purrytify_logo_foreground)
                         .setLargeIcon(loadAlbumArt(currentSong.coverUrl))
                         .setContentTitle(currentSong.title)
-
 //                        .setContentText("${currentSong.artist}")
-                        .setContentText("${currentSong.artist} • ${formatTime(currentPosition)}")
-
-//                        .setSubText("${formatTime(currentPosition)} / ${formatTime(duration)}")
-                        .setSubText(formatTime(duration))
+                        .setContentText("${currentSong.artist}")
+                        .setSubText("${formatTime(currentPosition)} / ${formatTime(duration)}")
+//                        .setSubText(formatTime(duration))
                         .setContentIntent(createContentIntent())
                         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                        // Add shuffle button
                         .addAction(
                             if (musicPlayerManager.isShuffleEnabled.value == true) 
                                 R.drawable.ic_shuffle_on else R.drawable.ic_shuffle,
                             "Shuffle",
                             createActionIntent(ACTION_SHUFFLE)
                         )
-                        // Previous button
                         .addAction(R.drawable.ic_skip_previous, "Previous", createActionIntent(ACTION_PREVIOUS))
-                        // Play/Pause button
                         .addAction(
                             if (musicPlayerManager.isPlaying.value == true) R.drawable.ic_pause else R.drawable.ic_play,
                             if (musicPlayerManager.isPlaying.value == true) "Pause" else "Play",
                             createActionIntent(ACTION_PLAY_PAUSE)
                         )
-                        // Next button
                         .addAction(R.drawable.ic_skip_next, "Next", createActionIntent(ACTION_NEXT))
-                        // Repeat button
                         .addAction(
                             when (musicPlayerManager.repeatMode.value) {
                                 MusicPlayerManager.RepeatMode.OFF -> R.drawable.ic_repeat
@@ -236,7 +246,6 @@ class NotificationService : LifecycleService() {
                             "Repeat",
                             createActionIntent(ACTION_REPEAT)
                         )
-                        // Stop button
                         .addAction(R.drawable.ic_stop, "Stop", createActionIntent(ACTION_STOP))
                         .setStyle(
                             MediaStyle()
@@ -244,13 +253,25 @@ class NotificationService : LifecycleService() {
                                 .setShowActionsInCompactView(0, 1, 2, 3, 4, 5) // Show shuffle, play/pause, next, repeat buttons
                         )
                         .setProgress(duration, currentPosition, false)
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setOngoing(true)
                         .build()
 
-                    notificationManager?.notify(notificationId, notification)
+
+
+                    if (isPlaying) {
+                        startForeground(notificationId, notification)
+                    } else {
+                        notificationManager?.notify(notificationId, notification)
+                        // Instead of continue, use return@launch for inline lambda
+                        if (!isPlaying) {
+                            delay(1000)
+                            return@launch
+                        }
+                    }
+
                 }
-                delay(1000)
+                delay(if (isPlaying) 1000 else 500)
             }
         }
     }
@@ -284,11 +305,17 @@ class NotificationService : LifecycleService() {
         progressUpdateJob = lifecycleScope.launch {
             while (true) {
                 musicPlayerManager.currentSong.value?.let { song ->
-                    if (musicPlayerManager.isPlaying.value == true) {
+                    val isPlaying = musicPlayerManager.isPlaying.value == true
+                    if (isPlaying) {
                         updatePlayerNotification(song, true)
+                    } else {
+                        // Update once when paused to show correct time
+                        updatePlayerNotification(song, false)
+                        delay(1000) // Wait longer when paused
+
                     }
                 }
-                delay(1000) // Update every second
+                delay(1000)
             }
         }
     }
@@ -317,6 +344,29 @@ class NotificationService : LifecycleService() {
                 MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
                 MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
             )
+
+            setPlaybackState(
+                PlaybackStateCompat.Builder()
+                    .setActions(
+                        PlaybackStateCompat.ACTION_PLAY or
+                                PlaybackStateCompat.ACTION_PAUSE or
+                                PlaybackStateCompat.ACTION_PLAY_PAUSE or
+                                PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
+                                PlaybackStateCompat.ACTION_STOP or
+                                PlaybackStateCompat.ACTION_SEEK_TO or
+                                PlaybackStateCompat.ACTION_SET_REPEAT_MODE or
+                                PlaybackStateCompat.ACTION_SET_SHUFFLE_MODE
+                    )
+                    .setState(
+                        PlaybackStateCompat.STATE_NONE,
+                        0,
+                        1.0f,
+                        SystemClock.elapsedRealtime()
+                    )
+                    .build()
+            )
+
 
             // Update metadata with duration
             val metadataBuilder = MediaMetadataCompat.Builder().apply {
@@ -411,6 +461,16 @@ class NotificationService : LifecycleService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         when(intent?.action) {
+            ACTION_UPDATE -> {
+                val isPlayerVisible = intent.getBooleanExtra("isPlayerVisible", false)
+                if (isPlayerVisible) {
+                    stopForeground(STOP_FOREGROUND_DETACH)
+                } else {
+                    musicPlayerManager.currentSong.value?.let {
+                        updateNotificationPlayback(musicPlayerManager.isPlaying.value == true)
+                    }
+                }
+            }
             ACTION_PLAY_PAUSE -> musicPlayerManager.togglePlayPause()
             ACTION_NEXT -> musicPlayerManager.playNextSong()
             ACTION_PREVIOUS -> musicPlayerManager.playPreviousSong()
@@ -427,19 +487,19 @@ class NotificationService : LifecycleService() {
 
 
 
-    private fun observePlayback() {
-        musicPlayerManager.currentSong.observe(this) { song ->
-            song?.let {
-                updatePlayerNotification(it, musicPlayerManager.isPlaying.value ?: false)
-            }
-        }
-
-        musicPlayerManager.isPlaying.observe(this) { isPlaying ->
-            musicPlayerManager.currentSong.value?.let {
-                updatePlayerNotification(it, isPlaying)
-            }
-        }
-    }
+//    private fun observePlayback() {
+//        musicPlayerManager.currentSong.observe(this) { song ->
+//            song?.let {
+//                updatePlayerNotification(it, musicPlayerManager.isPlaying.value ?: false)
+//            }
+//        }
+//
+//        musicPlayerManager.isPlaying.observe(this) { isPlaying ->
+//            musicPlayerManager.currentSong.value?.let {
+//                updatePlayerNotification(it, isPlaying)
+//            }
+//        }
+//    }
     override fun onDestroy() {
         super.onDestroy()
         progressUpdateJob?.cancel()
@@ -478,5 +538,6 @@ class NotificationService : LifecycleService() {
         const val ACTION_STOP = "action_stop"
         const val ACTION_SHUFFLE = "action_shuffle"
         const val ACTION_REPEAT = "action_repeat"
+        const val ACTION_UPDATE = "action_update"
     }
 }
