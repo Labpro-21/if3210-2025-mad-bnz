@@ -27,7 +27,7 @@ interface PlayHistoryDao {
             s.id as songId,
             s.title as title,
             s.artist as artist,
-            COUNT(*) as playCount,
+            COUNT(DISTINCT DATE(datetime(ph.playedAt/1000, 'unixepoch'))) as playCount,
             s.coverUrl as imageUrl
         FROM play_history ph
         JOIN songs s ON ph.songId = s.id
@@ -51,7 +51,7 @@ interface PlayHistoryDao {
     suspend fun getDailyPlayHistory(userId: String, startDate: String, endDate: String): List<DailyListening>
 
     @Query("""
-        SELECT s.artist as name, COUNT(*) as playCount, s.coverUrl as imageUrl
+        SELECT s.artist as name, COUNT(DISTINCT DATE(datetime(ph.playedAt/1000, 'unixepoch'))) as playCount, s.coverUrl as imageUrl
         FROM play_history ph
         JOIN songs s ON ph.songId = s.id
         WHERE ph.userId = :userId
@@ -75,4 +75,11 @@ interface PlayHistoryDao {
         AND strftime('%Y-%m', datetime(playedAt/1000, 'unixepoch')) = :yearMonth
     """)
     fun getMonthlyListeningTime(userId: String, yearMonth: String): Flow<Long>
+
+    @Query("""
+    SELECT * FROM play_history 
+    WHERE songId = :songId AND userId = :userId
+    ORDER BY playedAt DESC LIMIT 1
+""")
+    suspend fun getLastPlayHistory(songId: String, userId: String): PlayHistoryEntity?
 }

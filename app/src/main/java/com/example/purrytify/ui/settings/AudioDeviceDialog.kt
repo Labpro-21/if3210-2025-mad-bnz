@@ -62,9 +62,25 @@ class AudioDeviceDialog : DialogFragment() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.apply {
+            // Set dialog width when it starts
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            // Optional: add horizontal margin
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            // Optional: set window animations
+            setWindowAnimations(R.style.DialogAnimation)
+        }
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return Dialog(requireContext(), R.style.Theme_Dialog).apply {
-            window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            window?.apply {
+                setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                // Set dialog width to match parent
+                setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            }
         }
     }
     

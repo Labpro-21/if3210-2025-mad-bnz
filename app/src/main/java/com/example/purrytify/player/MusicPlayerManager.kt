@@ -39,6 +39,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
+import java.lang.Thread.sleep
 import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -495,9 +496,10 @@ class MusicPlayerManager @Inject constructor(
 
 
     fun release() {
-        viewModelScope.cancel()
         stopPositionUpdates()
-        releaseMediaPlayer()
+        mediaPlayer?.release()
+        mediaPlayer = null
+        _isPlaying.value = false
     }
 
     fun getCurrentPosition(): Int {
@@ -741,7 +743,10 @@ class MusicPlayerManager @Inject constructor(
     }
     fun playSong(song: Song) {
 
-        stopPositionUpdates()
+//        togglePlayPause()
+        release()
+        sleep(1000)
+//        stopPositionUpdates()
 
         viewModelScope.launch {
             try {
@@ -893,49 +898,92 @@ class MusicPlayerManager @Inject constructor(
     }
 
 
+//    private fun startPositionUpdates() {
+//        positionUpdateJob?.cancel()
+//        positionUpdateJob = CoroutineScope(Dispatchers.Main).launch {
+//            var lastUpdateTime = System.currentTimeMillis()
+//            while (isActive && mediaPlayer != null) {
+//                try {
+//                    val player = mediaPlayer
+//                    if (player != null && player.isPlaying) {
+//                        val currentTime = System.currentTimeMillis()
+//                        val playedDuration = currentTime - lastUpdateTime
+//
+//
+//                        if (playedDuration >= 1000) {
+//                            _currentSong.value?.let { song ->
+//                                try {
+//                                    analyticsRepository.logPlayback(
+//                                        songId = song.id,
+//                                        duration = playedDuration,
+//                                        userId = getCurrentUserId()
+//                                    )
+//                                } catch (e: Exception) {
+//                                    Log.e("MusicPlayerManager", "Analytics error", e)
+//                                }
+//                            }
+//                            lastUpdateTime = currentTime
+//                        }
+//
+//
+//                        _currentPosition.postValue(player.currentPosition)
+//                    } else {
+//                        delay(500)
+//                    }
+//
+//                    delay(100)
+//                } catch (e: Exception) {
+//                    Log.e("MusicPlayerManager", "Error in position update", e)
+//                    delay(500)
+//                }
+//            }
+//        }
+//    }
+
     private fun startPositionUpdates() {
-        positionUpdateJob?.cancel()
+        // Cancel existing job first
+        stopPositionUpdates()
+
+        // Use playerScope instead of creating new scope
         positionUpdateJob = playerScope.launch {
-            var lastUpdateTime = System.currentTimeMillis()
+            var lastAnalyticsUpdate = System.currentTimeMillis()
 
             while (isActive) {
                 try {
                     val player = mediaPlayer
                     if (player != null && player.isPlaying) {
+                        // Update position every 1 second
+                        _currentPosition.postValue(player.currentPosition)
+
+                        // Log analytics every 30 seconds
                         val currentTime = System.currentTimeMillis()
-                        val playedDuration = currentTime - lastUpdateTime
-
-
-                        if (playedDuration >= 1000) {
+                        if (currentTime - lastAnalyticsUpdate >= 30000) { // 30 seconds
                             _currentSong.value?.let { song ->
                                 try {
                                     analyticsRepository.logPlayback(
                                         songId = song.id,
-                                        duration = playedDuration,
+                                        duration = currentTime - lastAnalyticsUpdate,
                                         userId = getCurrentUserId()
                                     )
+                                    lastAnalyticsUpdate = currentTime
                                 } catch (e: Exception) {
-                                    Log.e("MusicPlayerManager", "Analytics error", e)
+                                    
                                 }
                             }
-                            lastUpdateTime = currentTime
                         }
-
-
-                        _currentPosition.postValue(player.currentPosition)
-                    } else {
-                        delay(500)
                     }
 
-                    delay(100)
+                    // Update every 1 second instead of 100ms
+                    delay(1000)
+
                 } catch (e: Exception) {
-                    Log.e("MusicPlayerManager", "Error in position update", e)
-                    delay(500)
+
+                    // If error occurs, wait longer before retry
+                    delay(2000)
                 }
             }
         }
     }
-
 
     private var notificationObserver: Observer<Boolean>? = null
 

@@ -19,6 +19,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.location.LocationManagerCompat.getCurrentLocation
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -50,6 +51,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.Locale
 import kotlin.math.log
 
@@ -107,7 +109,7 @@ class EditProfileFragment : Fragment() {
             }
 
             btnEditPhoto.setOnClickListener {
-                showImagePickerDialog()
+                showPhotoOptions()
             }
 
             btnSave.setOnClickListener {
@@ -133,18 +135,6 @@ class EditProfileFragment : Fragment() {
             .show()
     }
 
-    private fun showImagePickerDialog() {
-        val options = arrayOf("Take Photo", "Choose from Gallery", "Cancel")
-        AlertDialog.Builder(requireContext())
-            .setTitle("Choose Profile Photo")
-            .setItems(options) { dialog, which ->
-                when (which) {
-                    0 -> imagePickerHelper.launchCamera()
-                    1 -> imagePickerHelper.pickImage()
-                }
-            }
-            .show()
-    }
 
     private fun setupImagePicker() {
         imagePickerHelper = ImagePickerHelper(
@@ -258,13 +248,47 @@ class EditProfileFragment : Fragment() {
     private fun showLocationOptions() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Set Location")
-            .setItems(arrayOf("Use Current Location", "Choose on Map")) { _, which ->
+            .setItems(arrayOf("Use Current Location", "Input Manual")) { _, which ->
                 when (which) {
                     0 -> checkLocationPermission()
-                    1 -> openPlacePicker()
+                    1 -> showManualLocationInputDialog()
                 }
             }
             .show()
+    }
+    private fun showManualLocationInputDialog() {
+        val input = android.widget.EditText(requireContext()).apply {
+            hint = "Enter country or city"
+            setSingleLine()
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Input Location Manually")
+            .setView(input)
+            .setPositiveButton("OK") { _, _ ->
+                val manualLocation = input.text.toString().trim()
+                if (manualLocation.isNotEmpty()) {
+                    handleManualLocation(manualLocation)
+                } else {
+                    showLocationError("Location cannot be empty")
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun handleManualLocation(location: String) {
+        // Validasi: bisa pakai CountryUtils jika ingin hanya negara tertentu
+        val countryCode = CountryUtils.getCountryCode(location)
+        if (countryCode != null && CountryUtils.isCountrySupported(countryCode)) {
+            binding.tvLocation.text = CountryUtils.getCountryName(countryCode)
+            viewModel.updateLocation(countryCode)
+        } else {
+            // Jika ingin menerima apapun, bisa langsung set location tanpa validasi
+            binding.tvLocation.text = location
+            viewModel.updateLocation(location)
+            // Atau tampilkan error jika tidak valid
+            // showLocationError("Location not supported or not recognized")
+        }
     }
 
     private fun openPlacePicker() {
@@ -460,6 +484,76 @@ class EditProfileFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private var temporaryPhotoUri: Uri? = null
+
+
+
+    private fun showPhotoOptions() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Change Profile Photo")
+            .setItems(arrayOf("Take Photo", "Choose from Gallery")) { _, which ->
+                when (which) {
+                    0 -> takePhoto()
+                    1 -> imagePickerHelper.pickImage()
+                }
+            }
+            .show()
+    }
+
+    private fun takePhoto() {
+        try {
+            // Buat file temporary untuk foto
+            val photoFile = createTempImageFile()
+            temporaryPhotoUri = FileProvider.getUriForFile(
+                requireContext(),
+                "${requireContext().packageName}.provider",
+                photoFile
+            )
+
+            // Launch camera
+            temporaryPhotoUri?.let { uri ->
+                takePictureLauncher.launch(uri)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
+
+    private fun createTempImageFile(): File {
+        return File.createTempFile(
+            "JPEG_${System.currentTimeMillis()}_",
+            ".jpg",
+            requireContext().cacheDir
+        ).apply {
+            deleteOnExit() // Hapus file saat aplikasi ditutup
+        }
+    }
+
+    private val takePictureLauncher = registerForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            temporaryPhotoUri?.let { uri ->
+                try {
+                    // Compress dan resize foto
+                    val bitmap = imagePickerHelper.getCompressedBitmap(
+                        requireContext(),
+                        uri,
+                        maxWidthHeight = 1024
+                    )
+                    // Update UI dan simpan
+                    binding.ivProfilePhoto.setImageBitmap(bitmap)
+                    viewModel.updateProfile(null,uri)
+                    // Hapus file temporary
+                    requireContext().contentResolver.delete(uri, null, null)
+                } catch (e: Exception) {
+//                    Log.e(TAG, "Error processing camera photo", e)
+//                    showError("Failed to process photo")
+                }
+            }
+        }
     }
 
 }

@@ -1,7 +1,10 @@
 package com.example.purrytify.utils
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -17,32 +20,7 @@ class ImagePickerHelper(
     private var onImageSelected: (Uri) -> Unit
 ) {
 
-//    private val imagePickerLauncher = fragment.registerForActivityResult(
-//        ActivityResultContracts.StartActivityForResult()
-//    ) { result ->
-//        if (result.resultCode == android.app.Activity.RESULT_OK) {
-//            result.data?.data?.let { uri ->
-//                try {
-//                    val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-//                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-//                    fragment.requireContext().contentResolver.takePersistableUriPermission(
-//                        uri,
-//                        takeFlags
-//                    )
-//                } catch (e: Exception) {
-//                    Log.e("ImagePickerHelper", "Failed to get persistent permission", e)
-//                }
-//
-//                onImageSelected(uri)
-//            } ?: run {
-//                Toast.makeText(
-//                    fragment.requireContext(),
-//                    "Failed to select image",
-//                    Toast.LENGTH_SHORT
-//                ).show()
-//            }
-//        }
-//    }
+
 
     private val permissionLauncher = fragment.registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -142,5 +120,40 @@ class ImagePickerHelper(
 
     fun launchGallery() {
         galleryLauncher.launch("image/*")
+    }
+
+    fun getCompressedBitmap(context: Context, uri: Uri, maxWidthHeight: Int): Bitmap {
+        // Get original dimensions
+        val options = BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+        }
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            BitmapFactory.decodeStream(input, null, options)
+        }
+
+        // Calculate sample size
+        val sampleSize = calculateSampleSize(
+            options.outWidth,
+            options.outHeight,
+            maxWidthHeight
+        )
+
+        // Decode with sample size
+        options.apply {
+            inJustDecodeBounds = false
+            inSampleSize = sampleSize
+        }
+
+        return context.contentResolver.openInputStream(uri)?.use { input ->
+            BitmapFactory.decodeStream(input, null, options)
+        } ?: throw IllegalStateException("Could not decode image")
+    }
+
+    private fun calculateSampleSize(width: Int, height: Int, maxWidthHeight: Int): Int {
+        var sampleSize = 1
+        while (width / sampleSize > maxWidthHeight || height / sampleSize > maxWidthHeight) {
+            sampleSize *= 2
+        }
+        return sampleSize
     }
 }

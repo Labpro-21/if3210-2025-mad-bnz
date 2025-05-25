@@ -106,8 +106,15 @@ class SoundCapsuleRepository @Inject constructor(
 
     suspend fun logPlayback(songId: String, duration: Long, userId: String) {
         try {
+            val currentTime = System.currentTimeMillis()
             val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.US)
                 .format(System.currentTimeMillis())
+            val lastPlay = playHistoryDao.getLastPlayHistory(songId, userId)
+
+            // Jika terakhir play < 1 menit yang lalu, skip
+            if (lastPlay != null && (currentTime - lastPlay.playedAt) < 60000) {
+                return
+            }
             
             playHistoryDao.insertPlayHistory(
                 PlayHistoryEntity(
