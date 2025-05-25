@@ -33,6 +33,17 @@ import com.example.purrytify.utils.showToast
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.UUID
 
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
+import android.Manifest
+import android.content.pm.PackageManager
+import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
+import com.example.purrytify.player.PlayerViewModel
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class LibraryFragment : BaseFragment() {
     private var _binding: FragmentLibraryBinding? = null
@@ -66,6 +77,7 @@ class LibraryFragment : BaseFragment() {
         setupTabs()
         setupSearch()
         setupSortButton()
+        setupCameraButton()
         setupFilePickerHelper()
         setupImagePickerHelper()
         setupFabAddSong()
@@ -82,6 +94,74 @@ class LibraryFragment : BaseFragment() {
         imagePickerHelper = ImagePickerHelper(this) { uri ->
             selectedImageUri = uri
         }
+    }
+
+    private val cameraPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            startQrScan()
+        } else {
+            requireContext().showToast("Camera permission denied")
+        }
+    }
+
+    private val qrScanLauncher = registerForActivityResult(ScanContract()) { result ->
+        if (result.contents != null) {
+            handleQrResult(result.contents)
+        } else {
+            requireContext().showToast("QR scan cancelled")
+        }
+    }
+
+    private fun setupCameraButton() {
+        binding.btnScanQr.setOnClickListener {
+            // Cek permission kamera
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+                startQrScan()
+            } else {
+                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        }
+    }
+
+    private fun handleQrResult(contents: String) {
+        if (contents.startsWith("purrytify://song/")) {
+            val songId = contents.substringAfterLast("/")
+//            musicPlayerManager.playSong(song)
+//            findNavController().navigate(
+//                R.id.action_libraryFragment_to_playerFragment,
+//                Bundle().apply { putString("songId", songId) }
+//            )
+            val playerViewModel: PlayerViewModel by viewModels()
+            lifecycleScope.launch {
+                try {
+                    playerViewModel.fetchAndPlayOnlineSong(songId) { song ->
+                        if (song != null) {
+//                            Log.d(TAG, "fetchAndPlaySongById: Song fetched, playing song: $song")
+                            musicPlayerManager.playSong(song)
+
+                        }
+                    }
+                } catch (e: Exception) {
+//                    Log.e(TAG, "fetchAndPlaySongById: Failed to load song", e)
+                }
+            }
+        } else {
+            requireContext().showToast("Invalid QR code for Purrytify")
+        }
+    }
+
+    private fun startQrScan() {
+        val options = ScanOptions().apply {
+            setPrompt("Scan a Purrytify QR code")
+            setBeepEnabled(true)
+            setOrientationLocked(true)
+            setBarcodeImageEnabled(false)
+        }
+        qrScanLauncher.launch(options)
     }
 
     private fun setupAdapter() {
@@ -164,6 +244,7 @@ class LibraryFragment : BaseFragment() {
     }
 
     private fun setupSortButton() {
+
         binding.btnSort.setOnClickListener {
             val popup = PopupMenu(requireContext(), it)
             popup.menu.add("Sort by Title")

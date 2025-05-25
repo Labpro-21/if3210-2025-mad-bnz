@@ -16,12 +16,15 @@ import java.net.URL
 import java.nio.file.Files.exists
 import javax.inject.Inject
 import android.content.Context
+import com.example.purrytify.model.SongResponse
 import com.example.purrytify.utils.CountryUtils
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Singleton
 
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Singleton
 class SongRepository @Inject constructor(
@@ -53,6 +56,51 @@ class SongRepository @Inject constructor(
     suspend fun updateSong(song: Song): Int {
         return withContext(Dispatchers.IO) {
             songDao.updateSong(song)
+        }
+    }
+    suspend fun getOnlineSong(songId: String): Song? {
+        return try {
+            val response = apiService.getSongById(songId)
+            response.body()?.let { songResponse ->
+                mapResponseToSong(songResponse)
+            }
+        } catch (e: Exception) {
+            Log.e("SongRepository", "Failed to fetch song by id", e)
+            null
+        }
+    }
+    private fun mapResponseToSong(songResponse: SongResponse): Song {
+        return Song(
+            id = songResponse.id,
+            title = songResponse.title,
+            artist = songResponse.artist,
+            duration = parseDuration(songResponse.duration),
+            path = songResponse.url,
+            coverUrl = songResponse.artwork,
+            isLocal = false,
+            isDownloaded = false,
+            rank = songResponse.rank,
+            country = songResponse.country,
+            originalDuration = songResponse.duration,
+            createdAt = parseDate(songResponse.createdAt),
+            updatedAt = parseDate(songResponse.updatedAt)
+        )
+    }
+    private fun parseDuration(duration: String): Long {
+        return try {
+            val parts = duration.split(":")
+            (parts[0].toLong() * 60 + parts[1].toLong()) * 1000
+        } catch (e: Exception) {
+            0L
+        }
+    }
+
+    private fun parseDate(dateString: String): Long {
+        return try {
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                .parse(dateString)?.time ?: System.currentTimeMillis()
+        } catch (e: Exception) {
+            System.currentTimeMillis()
         }
     }
 

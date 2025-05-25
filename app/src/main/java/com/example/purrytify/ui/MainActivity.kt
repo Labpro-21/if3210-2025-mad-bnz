@@ -56,6 +56,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var logoutReceiver: BroadcastReceiver
 
+    private var isAppInitialized = false
+    private var pendingDeepLinkIntent: Intent? = null
+
     private val TAG = "MainActivity" // Add this for consistent logging
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +66,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
+
+        binding.loadingView.visibility = View.VISIBLE
+
         Log.d(TAG, "onCreate: Setting initial mini player visibility to GONE")
         binding.miniPlayerLayout.root.visibility = View.GONE
         
@@ -72,10 +77,62 @@ class MainActivity : AppCompatActivity() {
             setupInitialUI()
             lifecycleScope.launch(Dispatchers.Main) {
                 initializeComponents()
+                isAppInitialized = true
+                binding.loadingView.visibility = View.GONE
+
+                pendingDeepLinkIntent?.let {
+                    handleDeepLinkIfNeeded(it)
+                    pendingDeepLinkIntent = null
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "onCreate: Error during initialization", e)
             handleInitializationError(e)
+        }
+        if (intent?.data != null) {
+            pendingDeepLinkIntent = intent
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (!isAppInitialized) {
+            pendingDeepLinkIntent = intent
+        } else {
+            handleDeepLinkIfNeeded(intent)
+        }
+    }
+
+    private fun handleDeepLinkIfNeeded(intent: Intent?) {
+        if (!isAppInitialized) {
+            Log.d(TAG, "handleDeepLinkIfNeeded: App not initialized, pending deep link")
+            pendingDeepLinkIntent = intent
+            return
+        }
+        intent?.data?.let { uri ->
+            if (uri.scheme == "purrytify" && uri.host == "song") {
+                val songId = uri.lastPathSegment
+                Log.d(TAG, "handleDeepLinkIfNeeded: Deep link to songId=$songId")
+                if (songId != null){
+                    fetchAndPlaySongById(songId)
+                }
+            }
+        }
+    }
+    private fun fetchAndPlaySongById(songId: String) {
+        val playerViewModel: PlayerViewModel by viewModels()
+        lifecycleScope.launch {
+            try {
+                playerViewModel.fetchAndPlayOnlineSong(songId) { song ->
+                    if (song != null) {
+                        Log.d(TAG, "fetchAndPlaySongById: Song fetched, playing song: $song")
+                        musicPlayerManager.playSong(song)
+
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "fetchAndPlaySongById: Failed to load song", e)
+            }
         }
     }
 
@@ -145,7 +202,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        registerReceiver(logoutReceiver, IntentFilter(TokenRefreshService.ACTION_LOGOUT))
+        val intentFilter = IntentFilter(TokenRefreshService.ACTION_LOGOUT)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(logoutReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(logoutReceiver, intentFilter)
+        }
     }
 
     private fun handleInitializationError(error: Exception) {

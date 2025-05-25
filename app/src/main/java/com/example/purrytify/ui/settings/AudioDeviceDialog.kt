@@ -70,6 +70,7 @@ class AudioDeviceDialog : DialogFragment() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        audioDeviceManager.scanForDevices()
         setStyle(STYLE_NORMAL, R.style.Theme_Dialog)
     }
 

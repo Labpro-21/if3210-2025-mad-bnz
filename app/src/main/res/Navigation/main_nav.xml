@@ -12,6 +12,12 @@
         android:label="Player"
         tools:layout="@layout/fragment_player"
         >
+        <argument
+        android:name="songId"
+        app:argType="string"
+        />
+        <deepLink
+            app:uri="purrytify://song/{songId}" />
         <action
         android:id="@+id/action_global_playerFragment"
         app:destination="@id/playerFragment"

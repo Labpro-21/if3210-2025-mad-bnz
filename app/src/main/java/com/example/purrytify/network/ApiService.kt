@@ -40,6 +40,8 @@ interface ApiService {
         @Body requestBody: RequestBody
     ): Response<Unit>
 
+    @GET("api/songs/{id}")
+    suspend fun getSongById(@Path("id") id: String): Response<SongResponse>
 
     @Multipart
     @POST("api/profile/photo")

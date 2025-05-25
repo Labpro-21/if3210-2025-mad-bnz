@@ -22,4 +22,5 @@
         <item name="cornerSizeBottomLeft">8dp</item>
         <item name="cornerSizeBottomRight">0dp</item>
     </style>
+    <string name="scan_qr_code">Scan QR Code</string>
 </resources>

@@ -36,6 +36,16 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
+    fun fetchAndPlayOnlineSong(songId: String, onResult: (Song?) -> Unit) {
+        viewModelScope.launch {
+            val song = songRepository.getOnlineSong(songId)
+            song?.let {
+                musicPlayerManager.playSong(it)
+            }
+            onResult(song)
+        }
+    }
+
     fun togglePlayPause() {
         musicPlayerManager.togglePlayPause()
     }
